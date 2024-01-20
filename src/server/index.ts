@@ -1,8 +1,8 @@
 import express from "express";
 import cors from "cors";
-import { configureRoutes } from "../routes/index";
-import { checkErrorServer } from "./checkErrorServer.middleware";
 import dotenv from "dotenv";
+import { configureRoutes } from "../routes/index";
+
 dotenv.config();
 
 const FRONT_END_URL: string = process.env.FRONT_END_URL as string;
@@ -16,7 +16,5 @@ app.use(
     origin: FRONT_END_URL,
   })
 );
-// Middleware de gestión de los Errores del servidor.
-app.use(checkErrorServer);
 
 configureRoutes(app);
