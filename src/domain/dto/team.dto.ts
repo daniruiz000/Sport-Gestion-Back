@@ -2,11 +2,15 @@
 import { ModifyResult } from "mongodb";
 import { Team, ITeam, ITeamCreate } from "../entities/team-entity";
 import { Document } from "mongoose";
+import { CustomError } from "../../server/checkError.middleware";
+import { teamOdm } from "../odm/team.odm";
 
 const getAllTeamsPaginated = async (page: number, limit: number): Promise<ITeam[]> => {
-  return await Team.find()
-    .limit(limit)
-    .skip((page - 1) * limit);
+  try {
+    return await teamOdm.getAllTeamsPaginated(page, limit);
+  } catch (error) {
+    throw new CustomError("Error al obtener el equipo.", 400);
+  }
 };
 
 const getTeamCount = async (): Promise<number> => {
@@ -14,7 +18,11 @@ const getTeamCount = async (): Promise<number> => {
 };
 
 const getTeamById = async (id: string): Promise<Document<ITeam> | null> => {
-  return await Team.findById(id);
+  try {
+    return await teamDto.getTeamById(id);
+  } catch (error) {
+    throw new CustomError("Error al obtener el equipo.", 400);
+  }
 };
 
 const getMyTeam = async (page: number, limit: number): Promise<ITeam[]> => {
@@ -34,7 +42,7 @@ const createTeam = async (teamData: ITeamCreate): Promise<Document<ITeam>> => {
 
 const createTeamsFromArray = async (teamList: ITeamCreate[]): Promise<void> => {
   for (const team of teamList) {
-    await teamOdm.createTeam(team);
+    await teamDto.createTeam(team);
   }
 };
 
@@ -50,7 +58,7 @@ const updateTeam = async (id: string, teamData: ITeamCreate): Promise<Document<I
   return await Team.findByIdAndUpdate(id, teamData, { new: true, runValidators: true });
 };
 
-export const teamOdm = {
+export const teamDto = {
   getAllTeamsPaginated,
   getTeamCount,
   getTeamById,

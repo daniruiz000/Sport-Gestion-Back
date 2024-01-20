@@ -6,7 +6,7 @@ import { checkParams } from "../server/checkParams.middleware";
 
 export const teamRouter = express.Router();
 
-teamRouter.get("/", checkParams, isAuth, teamService.getTeams);
+teamRouter.get("/", checkParams, isAuth, teamService.getTeamsPaginated);
 teamRouter.get("/:id", isAuth, teamService.getTeamById);
 teamRouter.get("/name/:name", isAuth, teamService.getTeamByName);
 teamRouter.post("/", isAuth, teamService.createTeam);

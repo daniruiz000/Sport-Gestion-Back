@@ -1,18 +1,20 @@
 //  Importamos jwt
 import jwt from "jsonwebtoken";
 
-import dotenv from "dotenv"
+import dotenv from "dotenv";
+import { CustomError } from "../../server/checkError.middleware";
 
 dotenv.config();
 
-export const generateToken = (id: string, email: string): string => {
+export const generateToken = (id: string, email: string, rol: string): string => {
   if (!id || !email) {
-    throw new Error("Email or userId missing");
+    throw new CustomError("Falta Email o usuario para generar el token.", 400);
   }
-  //  La Info que mandamos por token
+
   const payload = {
     id,
     email,
+    rol,
   };
 
   const token = jwt.sign(payload, process.env.JWT_SECRET as string, { expiresIn: "1d" });

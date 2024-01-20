@@ -22,7 +22,9 @@ export interface IUserCreate {
   image?: string;
 }
 
-const userSchema = new Schema<IUserCreate>(
+export interface IUser extends IUserCreate, Document {}
+
+const userSchema = new Schema<IUser>(
   {
     firstName: {
       type: String,
@@ -41,7 +43,7 @@ const userSchema = new Schema<IUserCreate>(
     email: {
       type: String,
       trim: true,
-      unique: true, // indica que no puede haber otra entidad con esta propiedad que tenga el mismo valor.
+      unique: true,
       validate: {
         validator: (text: string) => validator.isEmail(text),
         message: "Email incorrecto",
@@ -52,7 +54,7 @@ const userSchema = new Schema<IUserCreate>(
       type: String,
       trim: true,
       minLength: [8, "La contraseña debe tener al menos 8 caracteres"],
-      select: false, // Indica que no lo deseamos mostrar cuando se realicen las peticiones.
+      select: false,
       required: true,
     },
     rol: {
@@ -72,7 +74,7 @@ const userSchema = new Schema<IUserCreate>(
       required: false,
     },
   },
-  { timestamps: true } // Cada vez que se modifique un documento refleja la hora y fecha de modificación
+  { timestamps: true }
 );
 
 // Cada vez que se guarde un usuario encriptamos la contraseña
@@ -90,7 +92,5 @@ userSchema.pre("save", async function (next) {
     next();
   }
 });
-// Creamos tipos para usuarios
-export type IUser = IUserCreate & Document;
-// Creamos un modelo para que siempre que creamos un user valide contra el Schema que hemos creado para ver si es valido.
-export const User = mongoose.model<IUserCreate>("User", userSchema);
+
+export const User = mongoose.model<IUser>("User", userSchema);

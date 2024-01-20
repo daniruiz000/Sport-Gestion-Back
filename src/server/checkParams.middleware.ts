@@ -11,8 +11,6 @@ export const checkParams = async (req: Request, res: Response, next: NextFunctio
       req.query.limit = limit as any;
       next();
     } else {
-      console.log("Parámetros no válidos:");
-      console.log(JSON.stringify(req.query));
       throw new CustomError("Parámetros no válidos", 400);
     }
   } catch (error) {

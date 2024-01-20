@@ -3,8 +3,9 @@ import { ModifyResult } from "mongodb";
 import { ITeamCreate, Team } from "../entities/team-entity";
 import { User, IUser, IUserCreate, ROL } from "../entities/user-entity";
 import { Document } from "mongoose";
+import { teamDto } from "../dto/team.dto";
 
-const getAllUsers = async (page: number, limit: number): Promise<IUser[]> => {
+const getAllUsersPaginated = async (page: number, limit: number): Promise<IUser[]> => {
   return await User.find()
     .populate("team")
     .limit(limit)
@@ -16,42 +17,42 @@ const getUserCount = async (): Promise<number> => {
 };
 
 const getUserById = async (id: string): Promise<Document<IUser> | null> => {
-  return await User.findById(id).populate("team");
+  const user = await User.findById(id).populate("team");
+  return user;
 };
 
 const getPlayersByIdTeam = async (teamId: string): Promise<IUser[]> => {
-  const players: IUser[] | null = await User.find({ team: teamId, rol: ROL.PLAYER }).populate("team");
+  const players = await User.find({ team: teamId, rol: ROL.PLAYER }).populate("team");
   return players;
 };
 
 const getPlayersWithoutTeam = async (): Promise<IUser[]> => {
-  const players: IUser[] | null = await User.find({ team: { $in: [null, undefined] }, rol: { $in: [ROL.PLAYER, ROL.MANAGER] } }).populate("team");
+  const players = await User.find({ team: { $in: [null, undefined] }, rol: { $in: [ROL.PLAYER, ROL.MANAGER] } }).populate("team");
   console.log(players);
   return players;
 };
 
 const getManagerByIdTeam = async (teamId: string): Promise<IUser[]> => {
-  const players: IUser[] | null = await User.find({ team: teamId, rol: ROL.MANAGER }).populate("team");
+  const players = await User.find({ team: teamId, rol: ROL.MANAGER }).populate("team");
   return players;
 };
 
 const getUserByEmailWithPassword = async (emailPassed: string): Promise<Document<IUser> | null> => {
-  const user: Document<IUser> | null = (await User.findOne({ email: emailPassed }).select("+password")) as any;
+  const user = await User.findOne({ email: emailPassed }).select("+password");
   return user;
 };
 
 const createUser = async (userData: IUserCreate): Promise<Document<IUser>> => {
   const user = new User(userData);
-  const document: Document<IUser> = (await user.save()) as any;
-  const userCopy = document.toObject();
+  const userSaved: IUser = await user.save();
+  const userCopy = userSaved.toObject();
   delete userCopy.password;
   delete userCopy.rol;
   return userCopy;
 };
 
 const createUsersFromArray = async (userList: IUserCreate[]): Promise<void> => {
-  for (const element of userList) {
-    const user = element;
+  for (const user of userList) {
     await userOdm.createUser(user);
   }
 };
@@ -72,21 +73,12 @@ const updateRoleUser = async (userId: string, newRole: ROL): Promise<Document<IU
   return await User.findByIdAndUpdate(userId, { rol: newRole }, { new: true, runValidators: true });
 };
 
-const assignTeamToUser = async (userId: string, teamId: string): Promise<Document<IUser> | null> => {
-  const team: ITeamCreate | null = await Team.findById(teamId);
-  if (!team) {
-    throw new Error("Equipo no encontrado");
-  }
-
-  return await User.findByIdAndUpdate(userId, { team: teamId }, { new: true });
-};
-
 const removeTeamFromUser = async (userId: string): Promise<Document<IUser> | null> => {
   return await User.findByIdAndUpdate(userId, { team: null }, { new: true });
 };
 
 export const userOdm = {
-  getAllUsers,
+  getAllUsersPaginated,
   getUserCount,
   getUserById,
   getPlayersByIdTeam,
@@ -99,6 +91,6 @@ export const userOdm = {
   deleteAllUsers,
   updateUser,
   updateRoleUser,
-  assignTeamToUser,
+
   removeTeamFromUser,
 };

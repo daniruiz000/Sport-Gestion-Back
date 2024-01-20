@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { teamOdm } from "../odm/team.odm";
 import { userOdm } from "../odm/user.odm";
 
-export const getTeams = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getTeamsPaginated = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
@@ -13,7 +13,7 @@ export const getTeams = async (req: Request, res: Response, next: NextFunction):
       return;
     }
 
-    const teams = await teamOdm.getAllTeams(page, limit);
+    const teams = await teamOdm.getAllTeamsPaginated(page, limit);
 
     const newTeams = [];
     for (const team of teams) {
@@ -136,7 +136,7 @@ export const updateTeam = async (req: Request, res: Response, next: NextFunction
 };
 
 export const teamService = {
-  getTeams,
+  getTeamsPaginated,
   getTeamById,
   getTeamByName,
   createTeam,

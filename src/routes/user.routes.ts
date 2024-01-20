@@ -10,7 +10,7 @@ userRouter.get("/myuser", isAuth, userService.getMyUser); // TODOS LOS LOGADOS A
 userRouter.get("/no-team", isAuth, userService.getPlayersWithoutTeam); // MANAGER / ADMIN
 userRouter.get("/myteam-users", isAuth, userService.getUsersByMyTeam); // MANAGER CON EQUIPO ASIGNADO / USERS CON EQUIPO ASIGNADO
 userRouter.get("/by-team/:id", isAuth, userService.getUsersByTeamId); // ADMIN
-userRouter.get("/", checkParams, isAuth, userService.getUsers); // ADMIN
+userRouter.get("/", checkParams, isAuth, userService.getUsersPaginated); // ADMIN
 userRouter.get("/:id", isAuth, userService.getUserById); // ADMIN
 userRouter.post("/", userService.createUser); // NO LOGADO
 userRouter.delete("/:id", isAuth, userService.deleteUser); // TODOS LOS LOGADOS A SI MISMOS / ADMIN A OTROS

@@ -2,23 +2,22 @@ import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
 
 import { generateToken } from "../utils/token";
-import { userOdm } from "../odm/user.odm";
+import { userDto } from "../dto/user.dto";
 import { matchOdm } from "../odm/match.odm";
 import { ROL } from "../entities/user-entity";
+import { CustomError } from "../../server/checkError.middleware";
 
-export const getUsers = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getUsersPaginated = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+    const userRol = req.user.rol;
 
     // ADMIN
-    if (req.user.rol !== "ADMIN") {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
+    userDto.isUserAuthForAction(userRol, [ROL.ADMIN]);
 
-    const users = await userOdm.getAllUsers(page, limit);
-    const totalElements = await userOdm.getUserCount();
+    const users = await userDto.getAllUsersPaginated(page, limit);
+    const totalElements = await userDto.getUserCount();
 
     const response = {
       totalItems: totalElements,
@@ -36,8 +35,8 @@ export const getUsers = async (req: Request, res: Response, next: NextFunction):
 export const getMyUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // ADMIN / EL PROPIO USUARIO A SÍ MISMO (CUALQUIER USUARIO LOGADO)
-    const user = await userOdm.getUserById(req.user.id as string);
-    const playersOnMyTeam = await userOdm.getPlayersByIdTeam(req.user.team as string);
+    const user = await userDto.getUserById(req.user.id as string);
+    const playersOnMyTeam = await userDto.getPlayersByIdTeam(req.user.team as string);
     const matchsOnMyTeam = await matchOdm.getMatchsByTeamId(req.user.team as string);
     const response = {
       user,
@@ -52,12 +51,11 @@ export const getMyUser = async (req: Request, res: Response, next: NextFunction)
 
 export const getPlayersWithoutTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const userRol = req.user.rol;
     //  ADMIN / MANAGER
-    if (req.user.rol !== "ADMIN" && req.user.rol !== "MANAGER") {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
-    const players = await userOdm.getPlayersWithoutTeam();
+    userDto.isUserAuthForAction(userRol, [ROL.ADMIN, ROL.MANAGER]);
+
+    const players = await userDto.getPlayersWithoutTeam();
     if (!players.length) {
       res.status(404).json({ error: "No existen jugadores sin equipo" });
     } else {
@@ -77,12 +75,12 @@ export const getUsersByMyTeam = async (req: Request, res: Response, next: NextFu
     }
     const teamId = req.user.team;
     if (teamId) {
-      const players = await userOdm.getPlayersByIdTeam(teamId);
+      const players = await userDto.getPlayersByIdTeam(teamId);
       if (!players) {
         res.status(404).json({ error: "No existen jugadores para este equipo" });
         return;
       }
-      const manager = await userOdm.getManagerByIdTeam(teamId);
+      const manager = await userDto.getManagerByIdTeam(teamId);
       if (!manager) {
         res.status(404).json({ error: "No existe manager para este equipo" });
         return;
@@ -117,17 +115,17 @@ export const getUsersByTeamId = async (req: Request, res: Response, next: NextFu
 
     if (!teamId) {
       res.status(404).json({ error: "Tienes que introducir un id de equipo" });
-      return
+      return;
     }
 
-    const players = await userOdm.getPlayersByIdTeam(teamId)
-    const manager = await userOdm.getManagerByIdTeam(teamId)
+    const players = await userDto.getPlayersByIdTeam(teamId);
+    const manager = await userDto.getManagerByIdTeam(teamId);
 
     const response = {
       players,
       manager,
-    }
-    res.json(response)
+    };
+    res.json(response);
   } catch (error) {
     next(error);
   }
@@ -142,7 +140,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
     }
 
     const id = req.params.id;
-    const user = await userOdm.getUserById(id);
+    const user = await userDto.getUserById(id);
     if (!user) {
       res.status(404).json({ error: "No existe el usuario" });
       return;
@@ -156,7 +154,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // NO LOGADO
-    const createdUser = await userOdm.createUser(req.body);
+    const createdUser = await userDto.createUser(req.body);
     res.status(201).json(createdUser);
   } catch (error) {
     next(error);
@@ -172,7 +170,7 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
       return;
     }
 
-    const userDeleted = await userOdm.deleteUser(deletedUserId);
+    const userDeleted = await userDto.deleteUser(deletedUserId);
     if (!userDeleted) {
       res.status(404).json({ error: "No existe el usuario" });
       return;
@@ -193,7 +191,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
       return;
     }
 
-    const userToUpdate = await userOdm.getUserById(updateUserId);
+    const userToUpdate = await userDto.getUserById(updateUserId);
     if (!userToUpdate) {
       res.status(404).json({ error: "No existe el usuario para actualizar" });
       return;
@@ -205,10 +203,8 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     const newEmail = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.email ? req.body.email : userToUpdate.get("email");
     const newPassword = req.body.password;
     const newImage = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.image ? req.body.image : userToUpdate.get("image");
-    const newRol = req.user.rol === "ADMIN" ? req.body.rol : userToUpdate.get("rol");
+    const newRol = req.user.rol === "ADMIN" ? req.body.rol || userToUpdate.get("rol") : userToUpdate.get("rol");
     const newTeam = (req.user.rol === "MANAGER" && !userToUpdate.get("team")) || (req.user.rol === "MANAGER" && req.user.team?.toString() === userToUpdate.toObject().team?._id.toString()) || req.user.rol === "ADMIN" ? req.body.team : userToUpdate.get("team");
-    console.log("Asi queda el newTeam");
-    console.log(newTeam);
 
     if (req.body.password) {
       const userSended = { ...req.body, rol: newRol, team: newTeam, firstName: newFirstName, lastName: newLastName, email: newEmail, password: newPassword, image: newImage };
@@ -236,31 +232,27 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     const { email, password } = req.body;
     // Todos los usuarios creados se puede logar con su password y su email
     if (!email || !password) {
-      res.status(400).json({ error: "Se deben especificar los campos email y password" });
-      return;
+      throw new CustomError("Se deben especificar los campos email y password", 400);
     }
 
-    const user: any = await userOdm.getUserByEmailWithPassword(email);
+    const user: any = await userDto.getUserByEmailWithPassword(email);
     if (!user) {
-      res.status(401).json({ error: "Email y/o contraseña incorrectos" });
-      return;
+      throw new CustomError("Email y/o contraseña incorrectos.", 401);
     }
     // Comprueba la password
     const userPassword: string = user.password;
     const match = await bcrypt.compare(password, userPassword);
     if (!match) {
-      res.status(401).json({ error: "Email y/o contraseña incorrectos" });
-      return;
+      throw new CustomError("Contraseña incorrecta.", 401);
     }
     // Generamos token JWT
-    const jwtToken = generateToken(user._id.toString(), user.email);
 
     const userToSend = user.toObject(user);
     delete userToSend.password;
+    const jwtToken = generateToken(user._id.toString(), user.email, userToSend.rol);
 
     res.status(200).json({
       token: jwtToken,
-      rol: userToSend.rol,
     });
   } catch (error) {
     next(error);
@@ -272,7 +264,7 @@ export const userService = {
   getUsersByMyTeam,
   getUsersByTeamId,
   getPlayersWithoutTeam,
-  getUsers,
+  getUsersPaginated,
   getUserById,
   createUser,
   deleteUser,
