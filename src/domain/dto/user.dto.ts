@@ -98,8 +98,7 @@ const createUser = async (userData: IUserCreate): Promise<Document<IUser>> => {
 };
 
 const createUsersFromArray = async (userList: IUserCreate[]): Promise<void> => {
-  for (const element of userList) {
-    const user = element;
+  for (const user of userList) {
     await userOdm.createUser(user);
   }
 };
