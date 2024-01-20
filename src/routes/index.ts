@@ -8,7 +8,7 @@ import { teamRouter } from "./team.routes";
 import { matchRouter } from "./match.routes";
 
 import { infoReq } from "../server/infoReq.middleware";
-import { connect } from "../server/connect.middleware";
+import { connect, disconnect } from "../server/connect.middleware";
 
 import { checkErrorRequest } from "../domain/services/checkErrorRequest.middleware";
 
@@ -35,11 +35,11 @@ export const configureRoutes = (app: any): any => {
   // app.use(connect);
 
   // Usamos las rutas
-  app.use("/user", infoReq, connect, userRouter);
-  app.use("/team", infoReq, connect, teamRouter);
-  app.use("/match", infoReq, connect, matchRouter);
-  app.use("/public", infoReq, connect, express.static("public"));
-  app.use("/", infoReq, routerHome);
+  app.use("/user", infoReq, connect, userRouter, disconnect);
+  app.use("/team", infoReq, connect, teamRouter, disconnect);
+  app.use("/match", infoReq, connect, matchRouter, disconnect);
+  app.use("/public", infoReq, connect, express.static("public"), disconnect);
+  app.use("/", infoReq, routerHome, disconnect);
 
   // Middleware de gestión de los Errores de las peticiones.
   app.use(checkErrorRequest);
