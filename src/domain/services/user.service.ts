@@ -32,7 +32,7 @@ export const getUsersPaginated = async (req: Request, res: Response, next: NextF
   }
 };
 
-export const getMyUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const getMyUserAllInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const userId = req.user.id as string;
     const userTeam = req.user.team as string;
@@ -73,78 +73,11 @@ export const getPlayersWithoutTeam = async (req: Request, res: Response, next: N
   }
 };
 
-export const getUsersByMyTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    // MANAGER
-    if (req.user.rol !== "PLAYER" && req.user.rol !== "MANAGER") {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
-    const teamId = req.user.team;
-    if (teamId) {
-      const players = await userDto.getPlayersByIdTeam(teamId);
-      if (!players) {
-        res.status(404).json({ error: "No existen jugadores para este equipo" });
-        return;
-      }
-      const manager = await userDto.getManagerByIdTeam(teamId);
-      if (!manager) {
-        res.status(404).json({ error: "No existe manager para este equipo" });
-        return;
-      }
-      const matchs = await matchOdm.getMatchsByTeamId(teamId);
-      if (!matchs) {
-        res.status(404).json({ error: "No existe partidos para este equipo" });
-        return;
-      }
-      const response = {
-        players,
-        manager,
-        matchs,
-      };
-      res.json(response);
-    } else {
-      res.status(404).json({ error: "No tienes equipo asignado" });
-    }
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getUsersByTeamId = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    //  ADMIN
-    if (req.user.rol !== "ADMIN") {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
-    const teamId = req.params.team;
-
-    if (!teamId) {
-      res.status(404).json({ error: "Tienes que introducir un id de equipo" });
-      return;
-    }
-
-    const players = await userDto.getPlayersByIdTeam(teamId);
-    const manager = await userDto.getManagerByIdTeam(teamId);
-
-    const response = {
-      players,
-      manager,
-    };
-    res.json(response);
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const getUserById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     //  ADMIN
-    if (req.user.rol !== "ADMIN") {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
+    const userRol = req.user.rol;
+    userDto.isUserAuthForAction(userRol, [ROL.ADMIN]);
 
     const id = req.params.id;
     const user = await userDto.getUserById(id);
@@ -213,7 +146,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     const newRol = req.user.rol === "ADMIN" ? req.body.rol || userToUpdate.get("rol") : userToUpdate.get("rol");
     const newTeam = (req.user.rol === "MANAGER" && !userToUpdate.get("team")) || (req.user.rol === "MANAGER" && req.user.team?.toString() === userToUpdate.toObject().team?._id.toString()) || req.user.rol === "ADMIN" ? req.body.team : userToUpdate.get("team");
 
-    if (req.body.password) {
+    if (newPassword) {
       const userSended = { ...req.body, rol: newRol, team: newTeam, firstName: newFirstName, lastName: newLastName, email: newEmail, password: newPassword, image: newImage };
       Object.assign(userToUpdate, userSended);
       await userToUpdate.save();
@@ -267,9 +200,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 };
 
 export const userService = {
-  getMyUser,
-  getUsersByMyTeam,
-  getUsersByTeamId,
+  getMyUserAllInfo,
   getPlayersWithoutTeam,
   getUsersPaginated,
   getUserById,
