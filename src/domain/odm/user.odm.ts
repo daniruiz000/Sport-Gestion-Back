@@ -1,9 +1,7 @@
 /* eslint-disable @typescript-eslint/indent */
 import { ModifyResult } from "mongodb";
-import { ITeamCreate, Team } from "../entities/team-entity";
 import { User, IUser, IUserCreate, ROL } from "../entities/user-entity";
 import { Document } from "mongoose";
-import { teamDto } from "../dto/team.dto";
 
 const getAllUsersPaginated = async (page: number, limit: number): Promise<IUser[]> => {
   return await User.find()
@@ -22,18 +20,18 @@ const getUserById = async (id: string): Promise<Document<IUser> | null> => {
 };
 
 const getPlayersByIdTeam = async (teamId: string): Promise<IUser[]> => {
-  const players = await User.find({ team: teamId, rol: ROL.PLAYER }).populate("team");
+  const players = await User.find({ team: teamId, rol: ROL.PLAYER });
   return players;
 };
 
 const getPlayersWithoutTeam = async (): Promise<IUser[]> => {
-  const players = await User.find({ team: { $in: [null, undefined] }, rol: { $in: [ROL.PLAYER, ROL.MANAGER] } }).populate("team");
+  const players = await User.find({ team: { $in: [null, undefined] }, rol: { $in: [ROL.PLAYER, ROL.MANAGER] } });
   console.log(players);
   return players;
 };
 
 const getManagerByIdTeam = async (teamId: string): Promise<IUser[]> => {
-  const players = await User.find({ team: teamId, rol: ROL.MANAGER }).populate("team");
+  const players = await User.find({ team: teamId, rol: ROL.MANAGER });
   return players;
 };
 

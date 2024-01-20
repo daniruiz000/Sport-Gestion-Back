@@ -6,8 +6,6 @@ import { User, IUser, IUserCreate, ROL } from "../entities/user-entity";
 import { userOdm } from "../odm/user.odm";
 import { teamDto } from "./team.dto";
 
-const isMySelf = () => {};
-
 const isUserAuthForAction = (userRol: string, authRoles: ROL[]): void => {
   let isAuth = false;
 

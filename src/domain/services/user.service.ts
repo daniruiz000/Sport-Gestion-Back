@@ -34,15 +34,22 @@ export const getUsersPaginated = async (req: Request, res: Response, next: NextF
 
 export const getMyUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    const userId = req.user.id as string;
+    const userTeam = req.user.team as string;
+
     // ADMIN / EL PROPIO USUARIO A SÍ MISMO (CUALQUIER USUARIO LOGADO)
-    const user = await userDto.getUserById(req.user.id as string);
-    const playersOnMyTeam = await userDto.getPlayersByIdTeam(req.user.team as string);
-    const matchsOnMyTeam = await matchOdm.getMatchsByTeamId(req.user.team as string);
+    const user = await userDto.getUserById(userId);
+    const playersOnMyTeam = await userDto.getPlayersByIdTeam(userTeam);
+    const matchsOnMyTeam = await matchOdm.getMatchsByTeamId(userTeam);
+    const manager = req.user.rol === ROL.MANAGER ? userId : await userDto.getManagerByIdTeam(userTeam);
+
     const response = {
       user,
-      playersOnMyTeam: req.user.rol === ROL.ADMIN ? [] : playersOnMyTeam,
-      matchsOnMyTeam,
+      playersOnMyTeam: req.user.rol === ROL.ADMIN ? null : playersOnMyTeam,
+      matchsOnMyTeam: req.user.rol === ROL.ADMIN ? null : matchsOnMyTeam,
+      manager: req.user.rol === ROL.ADMIN ? null : manager,
     };
+
     res.json(response);
   } catch (error) {
     next(error);
