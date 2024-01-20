@@ -1,10 +1,9 @@
-import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
 
 import { generateToken } from "../utils/token";
 import { userDto } from "../dto/user.dto";
 import { matchOdm } from "../odm/match.odm";
-import { ROL } from "../entities/user-entity";
+import { IUserCreate, ROL } from "../entities/user-entity";
 import { CustomError } from "../../server/checkError.middleware";
 
 export const getUsersPaginated = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -131,7 +130,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
       return;
     }
 
-    const userToUpdate = await userDto.getUserById(updateUserId);
+    const userToUpdate = await userDto.getUserByIdWhithPassword(updateUserId);
     if (!userToUpdate) {
       res.status(404).json({ error: "No existe el usuario para actualizar" });
       return;
@@ -141,27 +140,22 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     const newLastName = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.lastName ? req.body.lastName : userToUpdate.get("lastName");
     const newFirstName = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.firstName ? req.body.firstName : userToUpdate.get("firstName");
     const newEmail = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.email ? req.body.email : userToUpdate.get("email");
-    const newPassword = req.body.password;
+    const newPassword = req.user.id === updateUserId && req.body.password ? req.body.password : userToUpdate.get("password");
     const newImage = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.image ? req.body.image : userToUpdate.get("image");
     const newRol = req.user.rol === "ADMIN" ? req.body.rol || userToUpdate.get("rol") : userToUpdate.get("rol");
     const newTeam = (req.user.rol === "MANAGER" && !userToUpdate.get("team")) || (req.user.rol === "MANAGER" && req.user.team?.toString() === userToUpdate.toObject().team?._id.toString()) || req.user.rol === "ADMIN" ? req.body.team : userToUpdate.get("team");
 
-    if (newPassword) {
-      const userSended = { ...req.body, rol: newRol, team: newTeam, firstName: newFirstName, lastName: newLastName, email: newEmail, password: newPassword, image: newImage };
-      Object.assign(userToUpdate, userSended);
-      await userToUpdate.save();
-    } else {
-      const userSended = { ...req.body, rol: newRol, team: newTeam, firstName: newFirstName, lastName: newLastName, email: newEmail, image: newImage };
-      Object.assign(userToUpdate, userSended);
-
-      await userToUpdate.save();
-    }
-
-    // Quitamos la contraseña y el rol del usuario que enviamos en la respuesta
-    const userToSend: any = userToUpdate.toObject();
-    delete userToSend.password;
-    delete userToSend.rol;
-    res.json(userToSend);
+    const userSended: IUserCreate = JSON.parse(JSON.stringify(userToUpdate));
+    userSended.rol = newRol;
+    userSended.team = newTeam;
+    userSended.firstName = newFirstName;
+    userSended.lastName = newLastName;
+    userSended.email = newEmail;
+    userSended.image = newImage;
+    userSended.password = newPassword;
+    const userSaved = await userDto.updateUser(updateUserId, userSended);
+    console.log({ userSaved }, { userSended });
+    res.json(userSaved);
   } catch (error) {
     next(error);
   }
@@ -179,13 +173,12 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     if (!user) {
       throw new CustomError("Email y/o contraseña incorrectos.", 401);
     }
-    // Comprueba la password
+
     const userPassword: string = user.password;
-    const match = await bcrypt.compare(password, userPassword);
+    const match = password === userPassword;
     if (!match) {
       throw new CustomError("Contraseña incorrecta.", 401);
     }
-    // Generamos token JWT
 
     const userToSend = user.toObject(user);
     delete userToSend.password;

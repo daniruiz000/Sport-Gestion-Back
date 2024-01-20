@@ -19,6 +19,11 @@ const getUserById = async (id: string): Promise<Document<IUser> | null> => {
   return user;
 };
 
+const getUserByIdWithPassword = async (id: string): Promise<Document<IUser> | null> => {
+  const user = await User.findById(id).populate("team").select("+password");
+  return user;
+};
+
 const getPlayersByIdTeam = async (teamId: string): Promise<IUser[]> => {
   const players = await User.find({ team: teamId, rol: ROL.PLAYER });
   return players;
@@ -64,7 +69,8 @@ const deleteAllUsers = async (): Promise<boolean> => {
 };
 
 const updateUser = async (id: string, userData: IUserCreate): Promise<Document<IUser> | null> => {
-  return await User.findByIdAndUpdate(id, userData, { new: true, runValidators: true });
+  const updateUser = await User.findByIdAndUpdate(id, userData, { new: true, runValidators: true });
+  return updateUser;
 };
 
 const updateRoleUser = async (userId: string, newRole: ROL): Promise<Document<IUser> | null> => {
@@ -79,6 +85,7 @@ export const userOdm = {
   getAllUsersPaginated,
   getUserCount,
   getUserById,
+  getUserByIdWithPassword,
   getPlayersByIdTeam,
   getPlayersWithoutTeam,
   getManagerByIdTeam,

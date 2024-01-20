@@ -45,6 +45,15 @@ const getUserById = async (id: string): Promise<Document<IUser> | null> => {
   }
 };
 
+const getUserByIdWhithPassword = async (id: string): Promise<Document<IUser> | null> => {
+  try {
+    const userSaved = await userOdm.getUserByIdWithPassword(id);
+    return userSaved;
+  } catch (error) {
+    throw new CustomError("Error al obtener el usuario.", 400);
+  }
+};
+
 const getPlayersByIdTeam = async (teamId: string): Promise<IUser[]> => {
   try {
     const players: IUser[] | null = await userOdm.getPlayersByIdTeam(teamId);
@@ -163,6 +172,7 @@ export const userDto = {
   getAllUsersPaginated,
   getUserCount,
   getUserById,
+  getUserByIdWhithPassword,
   getPlayersByIdTeam,
   getPlayersWithoutTeam,
   getManagerByIdTeam,
