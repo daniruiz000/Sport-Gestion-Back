@@ -11,7 +11,7 @@ import { matchRouter } from "./match.routes";
 
 import { infoReq } from "../server/infoReq.middleware";
 import { connect } from "../server/connect.middleware";
-import { checkError } from "../domain/services/checkError.middleware";
+import { checkError } from "../server/checkError.middleware";
 
 export const configureRoutes = (app: any): any => {
   // Swagger

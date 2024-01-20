@@ -2,7 +2,7 @@ import express from "express";
 
 import { isAuth } from "../domain/services/auth.middleware";
 import { userService } from "../domain/services/user.service";
-import { checkParams } from "../domain/services/checkParams.middleware";
+import { checkParams } from "../server/checkParams.middleware";
 
 export const userRouter = express.Router();
 

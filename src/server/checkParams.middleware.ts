@@ -1,8 +1,5 @@
-import {
-  type Request,
-  type Response,
-  type NextFunction,
-} from "express";
+import { type Request, type Response, type NextFunction } from "express";
+import { CustomError } from "./checkError.middleware";
 
 export const checkParams = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -14,12 +11,11 @@ export const checkParams = async (req: Request, res: Response, next: NextFunctio
     if (!isNaN(page) && !isNaN(limit) && page > 0 && limit > 0) {
       req.query.page = page as any;
       req.query.limit = limit as any;
-      console.log("Parámetros correctos");
       next();
     } else {
       console.log("Parámetros no válidos:");
       console.log(JSON.stringify(req.query));
-      res.status(400).json({ error: "Params are not valid" });
+      throw new CustomError("Parámetros no válidos", 400);
     }
   } catch (error) {
     next(error);
