@@ -1,5 +1,5 @@
 {
-  "name": "la-liga-back",
+  "name": "Sport-Gestion-Back",
   "version": "1.0.0",
   "description": "API para gestión de una Liga",
   "main": "index.ts",
