@@ -1,0 +1,1037 @@
+{
+	"info": {
+		"_postman_id": "8fa4e4c4-f191-46c9-b463-105fb3d0f324",
+		"name": "LA LIGA",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26678393",
+		"_collection_link": "https://lunar-shadow-598419.postman.co/workspace/Daniel-Ruiz-Workspace~bb2fabbe-669e-40aa-85ab-0d5b9d85e36d/collection/26678393-8fa4e4c4-f191-46c9-b463-105fb3d0f324?action=share&creator=26678393&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "Teams",
+			"item": [
+				{
+					"name": "Get Teams // ADMIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGY0MGFmMmJmM2NkMWQ5NmYwNDU4ZSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MTA5OTE4LCJleHAiOjE2ODcxOTYzMTh9.i10Cpmwy_e_FgfvgfDunHRoiilHf5SwhizyGjvQAN4w",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/team?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"team"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Team by id // ADMIN OR USER IN ADDITION TEAM",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGY0MGFmMmJmM2NkMWQ5NmYwNDU4ZSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MTA5OTE4LCJleHAiOjE2ODcxOTYzMTh9.i10Cpmwy_e_FgfvgfDunHRoiilHf5SwhizyGjvQAN4w",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/team/648f41ad9ad0fa7a0f94bfa6",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"team",
+								"648f41ad9ad0fa7a0f94bfa6"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Team by name // ADMIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGY0MGFmMmJmM2NkMWQ5NmYwNDU4ZSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MTA5OTE4LCJleHAiOjE2ODcxOTYzMTh9.i10Cpmwy_e_FgfvgfDunHRoiilHf5SwhizyGjvQAN4w",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/team/name/Real Madrid CF",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"team",
+								"name",
+								"Real Madrid CF"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Team  // ADMIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGY0MGFmMmJmM2NkMWQ5NmYwNDU4ZSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MTA5OTE4LCJleHAiOjE2ODcxOTYzMTh9.i10Cpmwy_e_FgfvgfDunHRoiilHf5SwhizyGjvQAN4w",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Villarreal CF\",\r\n    \"initials\": \"VLL\",\r\n    \"image\": \"https://assets.laliga.com/assets/2019/06/07/small/villarreal.png\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/team",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"team"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Team by ID // ADMIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGY0MGFmMmJmM2NkMWQ5NmYwNDU4ZSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MTA5OTE4LCJleHAiOjE2ODcxOTYzMTh9.i10Cpmwy_e_FgfvgfDunHRoiilHf5SwhizyGjvQAN4w",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/team/648f4722de2602f4b1b8a717",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"team",
+								"648f4722de2602f4b1b8a717"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Team by ID // ADMIN OR MANAGER  OWNER TEAM",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGY0MGFmMmJmM2NkMWQ5NmYwNDU4ZSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MTA5OTE4LCJleHAiOjE2ODcxOTYzMTh9.i10Cpmwy_e_FgfvgfDunHRoiilHf5SwhizyGjvQAN4w",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Prueba CF\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/team/648f40a82bf3cd1d96f04506",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"team",
+								"648f40a82bf3cd1d96f04506"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Matchs",
+			"item": [
+				{
+					"name": "Get Matchs // NO- LOGIN",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/match/matchall",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match",
+								"matchall"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Matchs Paginated // NO- LOGIN",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/match?page=1&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Match by id // NO-LOGIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTAxZDAxMjllYTk4NDBjNGI1MGU2OSIsImVtYWlsIjoiaGVjdG9yLmd1ZXJyZXJvQGV4YW1wbGUuY29tIiwiaWF0IjoxNjg3MTY3NzU3LCJleHAiOjE2ODcyNTQxNTd9.4m5Q5UJ2SySawd8rM4LCs9AlFgwT3KqHJSg3s42cnfw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/match/64901d0329ea9840c4b50ea9",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match",
+								"64901d0329ea9840c4b50ea9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Match // ADMIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTAxZDAzMjllYTk4NDBjNGI1MGU5NSIsImVtYWlsIjoiamF2aWVyLmdhcmNpYUBleGFtcGxlLmNvbSIsImlhdCI6MTY4NzE2NjI4MiwiZXhwIjoxNjg3MjUyNjgyfQ.W74q0n7vS2ZOnX-xc7G41Zds_ESFUHIzP2DCzw45yv8",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"date\": \"2023-06-18T17:56:43.885Z\",\r\n    \"localTeam\": \"648f455539c3f489e1c7ed6b\",\r\n    \"visitorTeam\":\"648f455639c3f489e1c7ed7f\",\r\n    \"goalsLocal\": [\"648f455639c3f489e1c7ed83\"],\r\n    \"goalsVisitor\": [],\r\n    \"played\": false,\r\n    \"round\": 1\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/match",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Match by ID // ADMIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTAxZDAxMjllYTk4NDBjNGI1MGU2OSIsImVtYWlsIjoiaGVjdG9yLmd1ZXJyZXJvQGV4YW1wbGUuY29tIiwiaWF0IjoxNjg3MTY3NzU3LCJleHAiOjE2ODcyNTQxNTd9.4m5Q5UJ2SySawd8rM4LCs9AlFgwT3KqHJSg3s42cnfw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/match/64901d0329ea9840c4b50ea9",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match",
+								"64901d0329ea9840c4b50ea9"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Regenerate League // ADMIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTIxYmYzYzcyZjQxYjZmNzQ2ZGZlMiIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3Mjk3ODg0LCJleHAiOjE2ODczODQyODR9.REbSTIHfsjd11_yI8o_vgnX1nY2WMwCSBLyNx1f5Trc",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"startDate\": \"25/05/2023\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/match/generate-league",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match",
+								"generate-league"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Calculate Statics // ADMIN",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"startDate\": \"25/05/2023\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/match/calculate-statics",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match",
+								"calculate-statics"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Match by ID // ADMIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTAxZDAxMjllYTk4NDBjNGI1MGU2OSIsImVtYWlsIjoiaGVjdG9yLmd1ZXJyZXJvQGV4YW1wbGUuY29tIiwiaWF0IjoxNjg3MTY3NzU3LCJleHAiOjE2ODcyNTQxNTd9.4m5Q5UJ2SySawd8rM4LCs9AlFgwT3KqHJSg3s42cnfw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"goalsLocal\": [\r\n        \"648f455639c3f489e1c7ed83\"\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/match/64901d0329ea9840c4b50ea9",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"match",
+								"64901d0329ea9840c4b50ea9"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Get Users // ADMIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTBkZWIyMTVlY2Y2NGEyZjEyMjZjZCIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MjE3MDU0LCJleHAiOjE2ODczMDM0NTR9.itrjQXC2m5kkZtWbTMYiM1EnKkmpCGioZkJw2K7u29Y",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/user?page=5&limit=10",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "5"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My User // USER LOGADO",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTE2OTg4Njk1NDk2YjdjZDJmZmFjYiIsImVtYWlsIjoiamF2aWVyLmdhcmNpYUBleGFtcGxlLmNvbSIsImlhdCI6MTY4NzI1MTgxNywiZXhwIjoxNjg3MzM4MjE3fQ.bZXSrU-DMNtIvNCXMqWfsL-GltrgRso3ocs5Ut1bHRk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/user/myuser",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"myuser"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get User by Id // ADMIN",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTAxZDAzMjllYTk4NDBjNGI1MGVhNSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MTY4Mzg0LCJleHAiOjE2ODcyNTQ3ODR9.cbTzHOwvtamqro-EMqAFezxWMyQ14UdUKsDPPc8OeRY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/user/64901d0129ea9840c4b50e69",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"64901d0129ea9840c4b50e69"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Players No Team  // ADMIN OR MANAGER",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTE2OTg4Njk1NDk2YjdjZDJmZmFjYiIsImVtYWlsIjoiamF2aWVyLmdhcmNpYUBleGFtcGxlLmNvbSIsImlhdCI6MTY4NzI1MTgxNywiZXhwIjoxNjg3MzM4MjE3fQ.bZXSrU-DMNtIvNCXMqWfsL-GltrgRso3ocs5Ut1bHRk",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGYwZDU4ODNiMTUyOGUzYWY4MzQ3MCIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDk2NjkwLCJleHAiOjE2ODcxODMwOTB9.H71CL0_6adU9en2eNj0Nk4g9Y-6xdDOP97xV8-5__Qo",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/user/no-team",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"no-team"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get My Team Users // MANAGER AND PLAYER WITH TEAM",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTAxZTliM2FkZDNmNTQ0ZDM3MDg2NSIsImVtYWlsIjoicHJ1ZWJhQGdtYWlsLmNvbSIsImlhdCI6MTY4NzE2NjY2NiwiZXhwIjoxNjg3MjUzMDY2fQ.J0KnihX3zIba283hz3tLIW8w0DBB5sgT8ZlBszAELI4",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGYwZDU4ODNiMTUyOGUzYWY4MzQ3MiIsImVtYWlsIjoiYW50b25pb0BnbWFpbC5jb20iLCJpYXQiOjE2ODcwOTc0NjEsImV4cCI6MTY4NzE4Mzg2MX0.gTecXl2t85G25RWz-4B4BbncCe3fhISmAYWG_5S2VRI",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/user/myteam-users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"myteam-users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create User // NO-LOGIN",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "    {   \"firstName\": \"Antonio\",\r\n            \"lastName\": \"Fernandez\",\r\n            \"email\": \"prueba@gmail.com\",\r\n            \"password\": \"prueba123\",\r\n            \"rol\": \"PLAYER\",\r\n            \"image\": \"https://randomuser.me/api/portraits/men/85.jpg\"\r\n        }",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User by ID // ADMIN OR USER IN ADDITION",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTAxZDAxMjllYTk4NDBjNGI1MGU2OSIsImVtYWlsIjoiaGVjdG9yLmd1ZXJyZXJvQGV4YW1wbGUuY29tIiwiaWF0IjoxNjg3MTY4Mjg2LCJleHAiOjE2ODcyNTQ2ODZ9.Tl2D2rwcObA5C8KYVqGOGUyBsHakBSkFZSGMOEH_NyA",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/user/64901d0129ea9840c4b50e69",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"64901d0129ea9840c4b50e69"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Users by ID  // ADMIN OR USER IN ADDITION",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OTAxZDAzMjllYTk4NDBjNGI1MGU5NSIsImVtYWlsIjoiamF2aWVyLmdhcmNpYUBleGFtcGxlLmNvbSIsImlhdCI6MTY4NzE2ODQyMSwiZXhwIjoxNjg3MjU0ODIxfQ.l5JYr4gKyKUi2dVfbss_e3oUS5fIzqUTuTrKOxyTR3Q",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY0OGVlYzEwYWJiNGFkMDRlODQ0YWMwMSIsImVtYWlsIjoiYWRtaW5AZ21haWwuY29tIiwiaWF0IjoxNjg3MDkxNjgwLCJleHAiOjE2ODcxNzgwODB9.gq63oer9OujB6ICblqiCnGGc6CDbsJJQTTPicOc9_xE",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "   {\r\n  \"firstName\": \"Nuevo nombre\",\r\n  \"lastName\": \"Nuevo apellido\",\r\n  \"email\": \"nuevoemail@example.com\",\r\n\r\n  \"rol\": \"PLAYER\",\r\n  \"team\": \"<nuevo_equipo>\",\r\n  \"image\": \"nueva_imagen.jpg\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/64901d0329ea9840c4b50e95",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"64901d0329ea9840c4b50e95"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Login",
+			"item": [
+				{
+					"name": "Login Admin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"admin@gmail.com\",\r\n    \"password\": \"55555555\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"prueba@gmail.com\",\r\n    \"password\": \"prueba123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login  Player",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"hector.guerrero@example.com\",\r\n    \"password\": \"ilovecats123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login  Manager",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"javier.garcia@example.com\",\r\n    \"password\": \"12345678\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/user/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Home",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000"
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		}
+	]
+}
