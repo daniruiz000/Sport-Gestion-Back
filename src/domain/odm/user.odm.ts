@@ -69,7 +69,7 @@ const deleteAllUsers = async (): Promise<boolean> => {
 };
 
 const updateUser = async (id: string, userData: IUserCreate): Promise<Document<IUser> | null> => {
-  const updateUser = await User.findByIdAndUpdate(id, userData, { new: true, runValidators: true });
+  const updateUser = await User.findByIdAndUpdate(id, userData, { new: true, runValidators: true }).select("+password");
   return updateUser;
 };
 

@@ -1,3 +1,4 @@
+import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
 
 import { generateToken } from "../utils/token";
@@ -140,7 +141,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     const newLastName = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.lastName ? req.body.lastName : userToUpdate.get("lastName");
     const newFirstName = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.firstName ? req.body.firstName : userToUpdate.get("firstName");
     const newEmail = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.email ? req.body.email : userToUpdate.get("email");
-    const newPassword = req.user.id === updateUserId && req.body.password ? req.body.password : userToUpdate.get("password");
+    const newPassword = req.user.id === updateUserId && req.body.password ? await bcrypt.hash(req.body.password, 10) : userToUpdate.get("password");
     const newImage = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.image ? req.body.image : userToUpdate.get("image");
     const newRol = req.user.rol === "ADMIN" ? req.body.rol || userToUpdate.get("rol") : userToUpdate.get("rol");
     const newTeam = (req.user.rol === "MANAGER" && !userToUpdate.get("team")) || (req.user.rol === "MANAGER" && req.user.team?.toString() === userToUpdate.toObject().team?._id.toString()) || req.user.rol === "ADMIN" ? req.body.team : userToUpdate.get("team");
@@ -173,12 +174,13 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     if (!user) {
       throw new CustomError("Email y/o contraseña incorrectos.", 401);
     }
-
+    // Comprueba la password
     const userPassword: string = user.password;
-    const match = password === userPassword;
+    const match = await bcrypt.compare(password, userPassword);
     if (!match) {
       throw new CustomError("Contraseña incorrecta.", 401);
     }
+    // Generamos token JWT
 
     const userToSend = user.toObject(user);
     delete userToSend.password;

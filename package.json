@@ -1,5 +1,5 @@
 {
-  "name": "Sport-Gestion-Back",
+  "name": "Sport_Gestion_Back",
   "version": "1.0.0",
   "description": "API para gestión de una Liga",
   "main": "index.ts",
