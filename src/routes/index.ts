@@ -18,12 +18,9 @@ export const configureRoutes = (app: any): any => {
   const specs = swaggerJsDoc(swaggerOptions);
   app.use("/api-docs", swaggerUiExpress.serve, swaggerUiExpress.setup(specs));
 
-  app.use(infoReq);
-  app.use(connect);
-
-  app.use("/user", userRouter);
-  app.use("/team", teamRouter);
-  app.use("/match", matchRouter);
+  app.use("/user", infoReq, connect, userRouter);
+  app.use("/team", infoReq, connect, teamRouter);
+  app.use("/match", infoReq, connect, matchRouter);
   app.use("/public", express.static("public"));
   app.use("/", homeRouter);
 

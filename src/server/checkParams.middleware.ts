@@ -3,8 +3,6 @@ import { CustomError } from "./checkError.middleware";
 
 export const checkParams = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    console.log("Comprobamos los parámetros recibidos");
-
     const page = req.query.page ? parseInt(req.query?.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query?.limit as string) : 10;
 
