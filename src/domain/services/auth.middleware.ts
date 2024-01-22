@@ -1,6 +1,6 @@
 import { CustomError } from "../../server/checkError.middleware";
 import { userOdm } from "../odm/user.odm";
-import { verifyToken } from "../utils/token";
+import { verifyToken } from "../../utils/token";
 
 import { Request, Response, NextFunction } from "express";
 

@@ -2,13 +2,13 @@ import express from "express";
 
 import { isAuth } from "../domain/services/auth.middleware";
 import { matchService } from "../domain/services/match.service";
-import { checkParams } from "../server/checkParams.middleware";
+import { checkPaginatedParams } from "../server/checkPaginatedParams.middleware";
 
 export const matchRouter = express.Router();
 
 matchRouter.get("/calculate-statics", matchService.calculateTeamStatistics);
 matchRouter.get("/matchall", matchService.getAllMatchs);
-matchRouter.get("/", checkParams, matchService.getMatchs);
+matchRouter.get("/", checkPaginatedParams, matchService.getMatchs);
 matchRouter.get("/:id", matchService.getMatchById);
 matchRouter.post("/", isAuth, matchService.createMatch);
 matchRouter.delete("/:id", isAuth, matchService.deleteMatch);

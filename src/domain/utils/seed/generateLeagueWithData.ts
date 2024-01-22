@@ -1,15 +1,15 @@
-import { IMatchCreate } from "../entities/match-entity";
-import { Team } from "../entities/team-entity";
-import { ROL, User } from "../entities/user-entity";
-import { matchOdm } from "../odm/match.odm";
-import { convertDateStringToDate } from "./convertDateStringToDate";
+import { IMatchCreate } from "../../entities/match-entity";
+import { Team } from "../../entities/team-entity";
+import { ROL, User } from "../../entities/user-entity";
+import { matchOdm } from "../../odm/match.odm";
+import { convertDateStringToDate } from "../convertDateStringToDate";
 import { generateGoalIds } from "./generateGoals";
-import { shuffleIteamArray } from "./shuffleIteamArray";
+import { shuffleIteamArray } from "../shuffleIteamArray";
 
 export const generateLeagueWithData = async (): Promise<void> => {
   try {
     const teamsSended = await Team.find();
-    const teams = shuffleIteamArray(teamsSended)
+    const teams = shuffleIteamArray(teamsSended);
 
     if (teams.length === 0) {
       console.error("No hay equipos en la BBDD.");
@@ -18,10 +18,10 @@ export const generateLeagueWithData = async (): Promise<void> => {
 
     if (teams.length % 2 !== 0) {
       console.error("La cantidad de equipos es impar.");
-      return
+      return;
     }
 
-    const players = await User.find({ rol: ROL.PLAYER, team: { $in: teams.map(team => team.id) } });
+    const players = await User.find({ rol: ROL.PLAYER, team: { $in: teams.map((team) => team.id) } });
     if (players.length === 0) {
       console.error("No hay jugadores en la BBDD.");
       return;
@@ -33,9 +33,9 @@ export const generateLeagueWithData = async (): Promise<void> => {
     const matches: IMatchCreate[] = [];
     const numTeams = teams.length;
     const numRoundsPerFase = numTeams - 1;
-    const actualDate = new Date()
+    const actualDate = new Date();
     const startDate = convertDateStringToDate("22/5/22");
-    let contDate = startDate
+    let contDate = startDate;
 
     // Generar los enfrentamientos de la primera vuelta
     for (let round = 0; round < numRoundsPerFase; round++) {
@@ -71,7 +71,7 @@ export const generateLeagueWithData = async (): Promise<void> => {
           played: matchDate < actualDate,
           round: round + 1, // Se incrementa en 1 para indicar la ronda actual
         };
-        contDate = matchDate
+        contDate = matchDate;
         roundMatches.push(match);
       }
 
@@ -121,7 +121,7 @@ export const generateLeagueWithData = async (): Promise<void> => {
 
     // Guardar los partidos en la base de datos.
     await matchOdm.createMatchsFromArray(matches);
-    const matchSort = matches.sort((a, b) => a.round - b.round)
+    const matchSort = matches.sort((a, b) => a.round - b.round);
     for (let i = 0; i < matchSort.length; i++) {
       const match = matches[i];
       const formattedDate = match.date.toLocaleDateString();

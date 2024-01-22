@@ -1,11 +1,13 @@
 import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
 
-import { generateToken } from "../utils/token";
+import { generateToken } from "../../utils/token";
 import { userDto } from "../dto/user.dto";
 import { matchOdm } from "../odm/match.odm";
 import { IUserCreate, ROL } from "../entities/user-entity";
 import { CustomError } from "../../server/checkError.middleware";
+import { userOdm } from "../odm/user.odm";
+import { compareEncryptedDataWithData } from "../../utils/crypt";
 
 export const getUsersPaginated = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -19,8 +21,8 @@ export const getUsersPaginated = async (req: Request, res: Response, next: NextF
       throw new CustomError("No estás autorizado para realizar la operación.", 409);
     }
 
-    const users = await userDto.getAllUsersPaginated(page, limit);
-    const totalElements = await userDto.getUserCount();
+    const users = await userOdm.getAllUsersPaginated(page, limit);
+    const totalElements = await userOdm.getUserCount();
 
     const response = {
       totalItems: totalElements,
@@ -41,10 +43,10 @@ export const getMyUserAllInfo = async (req: Request, res: Response, next: NextFu
     const userId = req.user.id as string;
     const userTeam = req.user.team as string;
 
-    const user = await userDto.getUserById(userId);
-    const playersOnMyTeam = await userDto.getPlayersByIdTeam(userTeam);
+    const user = await userOdm.getUserById(userId);
+    const playersOnMyTeam = await userOdm.getPlayersByIdTeam(userTeam);
     const matchsOnMyTeam = await matchOdm.getMatchsByTeamId(userTeam);
-    const manager = req.user.rol === ROL.MANAGER ? userId : await userDto.getManagerByIdTeam(userTeam);
+    const manager = req.user.rol === ROL.MANAGER ? userId : await userOdm.getManagerByIdTeam(userTeam);
 
     const response = {
       user,
@@ -68,7 +70,7 @@ export const getPlayersWithoutTeam = async (req: Request, res: Response, next: N
     if (!isUserRolAuth) {
       throw new CustomError("No estás autorizado para realizar la operación.", 409);
     }
-    const players = await userDto.getPlayersWithoutTeam();
+    const players = await userOdm.getPlayersWithoutTeam();
     if (!players.length) {
       res.status(404).json({ error: "No existen jugadores sin equipo" });
     } else {
@@ -88,7 +90,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
       throw new CustomError("No estás autorizado para realizar la operación.", 409);
     }
     const id = req.params.id;
-    const user = await userDto.getUserById(id);
+    const user = await userOdm.getUserById(id);
     if (!user) {
       res.status(404).json({ error: "No existe el usuario" });
       return;
@@ -102,7 +104,7 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
 export const createUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // NO LOGADO
-    const createdUser = await userDto.createUser(req.body);
+    const createdUser = await userOdm.createUser(req.body);
     res.status(201).json(createdUser);
   } catch (error) {
     next(error);
@@ -118,7 +120,7 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
       return;
     }
 
-    const userDeleted = await userDto.deleteUser(deletedUserId);
+    const userDeleted = await userOdm.deleteUser(deletedUserId);
     if (!userDeleted) {
       res.status(404).json({ error: "No existe el usuario" });
       return;
@@ -140,7 +142,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
       return;
     }
 
-    const userToUpdate = await userDto.getUserByIdWhithPassword(updateUserId);
+    const userToUpdate = await userOdm.getUserByIdWithPassword(updateUserId);
     if (!userToUpdate) {
       res.status(404).json({ error: "No existe el usuario para actualizar" });
       return;
@@ -162,7 +164,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     userSended.email = newEmail;
     userSended.image = newImage;
     userSended.password = newPassword;
-    const userSaved = await userDto.updateUser(updateUserId, userSended);
+    const userSaved = await userOdm.updateUser(updateUserId, userSended);
     console.log({ userSaved }, { userSended });
     res.json(userSaved);
   } catch (error) {
@@ -175,28 +177,14 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     // Todos los usuarios creados se puede logar con su password y su email
     const { email, password } = req.body;
 
-    if (!email || !password) {
-      throw new CustomError("Se deben especificar los campos email y password", 400);
-    }
+    const user = await userOdm.getUserByEmailWithPassword(email);
+    const userPassword = user.password;
 
-    const user: any = await userDto.getUserByEmailWithPassword(email);
-    if (!user) {
-      throw new CustomError("Email y/o contraseña incorrectos.", 401);
-    }
+    await compareEncryptedDataWithData(password, userPassword);
 
-    const userPassword: string = user.password;
-    const match = await bcrypt.compare(password, userPassword);
-    if (!match) {
-      throw new CustomError("Contraseña incorrecta.", 401);
-    }
+    const jwtToken = generateToken(user.id, user.email, user.rol);
 
-    const userToSend = user.toObject(user);
-    delete userToSend.password;
-    const jwtToken = generateToken(user._id.toString(), user.email, userToSend.rol);
-
-    res.status(200).json({
-      token: jwtToken,
-    });
+    res.status(200).json({ token: jwtToken });
   } catch (error) {
     next(error);
   }

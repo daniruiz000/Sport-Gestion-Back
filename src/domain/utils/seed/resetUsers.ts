@@ -1,20 +1,20 @@
-import { userList } from "../../data";
-import { Team } from "../entities/team-entity";
-import { ROL, IUserCreate } from "../entities/user-entity";
-import { userOdm } from "../odm/user.odm";
+import { userList } from "../../../data";
+import { Team } from "../../entities/team-entity";
+import { ROL, IUserCreate } from "../../entities/user-entity";
+import { userOdm } from "../../odm/user.odm";
 
 export const resetUsers = async (): Promise<void> => {
   try {
-    const playersWithTeam = 50
+    const playersWithTeam = 50;
     await userOdm.deleteAllUsers();
     console.log("Usuarios borrados");
 
-    const admins = userList.filter(user => user.rol === ROL.ADMIN);
-    const managers = userList.filter(user => user.rol === ROL.MANAGER);
-    const players = userList.filter(user => user.rol === ROL.PLAYER);
+    const admins = userList.filter((user) => user.rol === ROL.ADMIN);
+    const managers = userList.filter((user) => user.rol === ROL.MANAGER);
+    const players = userList.filter((user) => user.rol === ROL.PLAYER);
     const teams = await Team.find();
-    const playersPerTeam = playersWithTeam / teams.length
-    const playersNoTeam = players.length - 50
+    const playersPerTeam = playersWithTeam / teams.length;
+    const playersNoTeam = players.length - 50;
 
     for (let i = 0; i < playersWithTeam; i++) {
       const player: IUserCreate = players[i];
@@ -36,8 +36,7 @@ export const resetUsers = async (): Promise<void> => {
     }
     console.log("Managers creados y asignados a equipos correctamente");
 
-    for (let i = 0; i < admins.length; i++) {
-      const admin: IUserCreate = admins[i];
+    for (const admin of admins) {
       await userOdm.createUser(admin);
     }
     console.log("Admins creados correctamente");
@@ -50,8 +49,8 @@ export const resetUsers = async (): Promise<void> => {
       playersNoTeam,
       managers: managers.length,
       admins: admins.length,
-      playersPerTeam
-    })
+      playersPerTeam,
+    });
   } catch (error) {
     console.error(error);
   }

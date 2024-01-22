@@ -1,4 +1,4 @@
-import { IUser } from "../entities/user-entity";
+import { IUser } from "../../entities/user-entity";
 
 export const generateGoalIds = (players: IUser[], minId: number, maxId: number): IUser[] => {
   const goalIds: IUser[] = [];

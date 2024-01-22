@@ -1,8 +1,8 @@
 import mongoose, { Document } from "mongoose";
-
 import validator from "validator";
-import bcrypt from "bcrypt";
+
 import { Team } from "./team-entity";
+import { encryptData } from "../../utils/crypt";
 
 const Schema = mongoose.Schema;
 
@@ -79,8 +79,7 @@ const userSchema = new Schema<IUser>(
 
 userSchema.pre("save", async function (next) {
   try {
-    const saltRounds = 10;
-    const passwordEncrypted = await bcrypt.hash(this.password, saltRounds);
+    const passwordEncrypted = await encryptData(this.password);
     this.password = passwordEncrypted;
     next();
   } catch (error) {

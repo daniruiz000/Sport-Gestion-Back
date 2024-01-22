@@ -2,11 +2,11 @@ import express from "express";
 
 import { isAuth } from "../domain/services/auth.middleware";
 import { teamService } from "../domain/services/team.service";
-import { checkParams } from "../server/checkParams.middleware";
+import { checkPaginatedParams } from "../server/checkPaginatedParams.middleware";
 
 export const teamRouter = express.Router();
 
-teamRouter.get("/", checkParams, isAuth, teamService.getTeamsPaginated);
+teamRouter.get("/", checkPaginatedParams, isAuth, teamService.getTeamsPaginated);
 teamRouter.get("/:id", isAuth, teamService.getTeamById);
 teamRouter.get("/name/:name", isAuth, teamService.getTeamByName);
 teamRouter.post("/", isAuth, teamService.createTeam);
