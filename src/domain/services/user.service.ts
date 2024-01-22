@@ -191,8 +191,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 };
 
 export const userService = {
-  getMyUserAllInfo,1379
-  
+  getMyUserAllInfo,
   getPlayersWithoutTeam,
   getUsersPaginated,
   getUserById,
