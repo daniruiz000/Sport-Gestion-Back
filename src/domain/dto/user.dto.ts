@@ -6,18 +6,16 @@ import { User, IUser, IUserCreate, ROL } from "../entities/user-entity";
 import { userOdm } from "../odm/user.odm";
 import { teamDto } from "./team.dto";
 
-const isUserAuthForAction = (userRol: string, authRoles: ROL[]): void => {
+const isUserRolAuthForAction = (userAuthInfo: any, authRoles: ROL[]): boolean => {
   let isAuth = false;
 
   for (const authRol of authRoles) {
-    if (authRol === userRol) {
+    if (authRol === userAuthInfo.rol) {
       isAuth = true;
     }
   }
 
-  if (!isAuth) {
-    throw new CustomError("No estás autorizado para realizar la operación.", 409);
-  }
+  return isAuth;
 };
 
 const getAllUsersPaginated = async (page: number, limit: number): Promise<IUser[]> => {
@@ -85,12 +83,19 @@ const getManagerByIdTeam = async (teamId: string): Promise<IUser[]> => {
 };
 
 const getUserByEmailWithPassword = async (emailPassed: string): Promise<Document<IUser> | null> => {
-  try {
-    const user = await userOdm.getUserByEmailWithPassword(emailPassed);
-    return user;
-  } catch (error) {
+  const user = await userOdm.getUserByEmailWithPassword(emailPassed);
+  if (!user) {
     throw new CustomError("Error al obtener el usuario.", 400);
   }
+  return user;
+};
+
+const getUserByEmaild = async (emailPassed: string): Promise<Document<IUser> | null> => {
+  const user = await userOdm.getUserByEmail(emailPassed);
+  if (!user) {
+    throw new CustomError("Error al obtener el usuario.", 400);
+  }
+  return user;
 };
 
 const createUser = async (userData: IUserCreate): Promise<Document<IUser>> => {
@@ -168,7 +173,7 @@ const removeTeamFromUser = async (userId: string): Promise<Document<IUser> | nul
 };
 
 export const userDto = {
-  isUserAuthForAction,
+  isUserRolAuthForAction,
   getAllUsersPaginated,
   getUserCount,
   getUserById,
@@ -177,6 +182,7 @@ export const userDto = {
   getPlayersWithoutTeam,
   getManagerByIdTeam,
   getUserByEmailWithPassword,
+  getUserByEmaild,
   createUser,
   createUsersFromArray,
   deleteUser,

@@ -77,12 +77,11 @@ const userSchema = new Schema<IUser>(
   { timestamps: true }
 );
 
-// Cada vez que se guarde un usuario encriptamos la contraseña
 userSchema.pre("save", async function (next) {
   try {
     const saltRounds = 10;
-    const passwordEncrypted = await bcrypt.hash(this.password, saltRounds); // Encriptamos la contraseña
-    this.password = passwordEncrypted; // guardamos la password en la entidad User
+    const passwordEncrypted = await bcrypt.hash(this.password, saltRounds);
+    this.password = passwordEncrypted;
     next();
   } catch (error) {
     next();

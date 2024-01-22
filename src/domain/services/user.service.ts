@@ -9,12 +9,15 @@ import { CustomError } from "../../server/checkError.middleware";
 
 export const getUsersPaginated = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    // ADMIN
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-    const userRol = req.user.rol;
+    const userAuthInfo = req.user;
 
-    // ADMIN
-    userDto.isUserAuthForAction(userRol, [ROL.ADMIN]);
+    const isUserRolAuth = userDto.isUserRolAuthForAction(userAuthInfo, [ROL.ADMIN]);
+    if (!isUserRolAuth) {
+      throw new CustomError("No estás autorizado para realizar la operación.", 409);
+    }
 
     const users = await userDto.getAllUsersPaginated(page, limit);
     const totalElements = await userDto.getUserCount();
@@ -34,10 +37,10 @@ export const getUsersPaginated = async (req: Request, res: Response, next: NextF
 
 export const getMyUserAllInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    // ADMIN / EL PROPIO USUARIO A SÍ MISMO (CUALQUIER USUARIO LOGADO)
     const userId = req.user.id as string;
     const userTeam = req.user.team as string;
 
-    // ADMIN / EL PROPIO USUARIO A SÍ MISMO (CUALQUIER USUARIO LOGADO)
     const user = await userDto.getUserById(userId);
     const playersOnMyTeam = await userDto.getPlayersByIdTeam(userTeam);
     const matchsOnMyTeam = await matchOdm.getMatchsByTeamId(userTeam);
@@ -58,10 +61,13 @@ export const getMyUserAllInfo = async (req: Request, res: Response, next: NextFu
 
 export const getPlayersWithoutTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const userRol = req.user.rol;
     //  ADMIN / MANAGER
-    userDto.isUserAuthForAction(userRol, [ROL.ADMIN, ROL.MANAGER]);
+    const userRol = req.user.rol;
 
+    const isUserRolAuth = userDto.isUserRolAuthForAction(userRol, [ROL.ADMIN, ROL.MANAGER]);
+    if (!isUserRolAuth) {
+      throw new CustomError("No estás autorizado para realizar la operación.", 409);
+    }
     const players = await userDto.getPlayersWithoutTeam();
     if (!players.length) {
       res.status(404).json({ error: "No existen jugadores sin equipo" });
@@ -77,8 +83,10 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
   try {
     //  ADMIN
     const userRol = req.user.rol;
-    userDto.isUserAuthForAction(userRol, [ROL.ADMIN]);
-
+    const isUserRolAuth = userDto.isUserRolAuthForAction(userRol, [ROL.ADMIN]);
+    if (!isUserRolAuth) {
+      throw new CustomError("No estás autorizado para realizar la operación.", 409);
+    }
     const id = req.params.id;
     const user = await userDto.getUserById(id);
     if (!user) {
@@ -103,7 +111,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 
 export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // ADMIN / EL PROPIO USUARIO A SÍ MISMO (CUALQUIER USUARIO LOGADO)
+    // ADMIN / EL PROPIO USUARIO A SÍ MISMO (CUALQUIER USUARIO LOGADO)/ MANAGER A JUGADORES DE SU EQUIPO
     const deletedUserId = req.params.id;
     if (req.user.rol !== "ADMIN" && req.user.id !== deletedUserId) {
       res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
@@ -123,9 +131,10 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    // Solo ADMIN o el propio usuario a sí mismo (cualquier usuario logado) / MANAGER A LOS DE SU EQUIPO
+
     const updateUserId = req.params.id;
 
-    // Solo ADMIN o el propio usuario a sí mismo (cualquier usuario logado) / MANAGER A LOS DE SU EQUIPO
     if (req.user.rol !== "ADMIN" && req.user.id !== updateUserId && req.user.rol !== "MANAGER") {
       res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
       return;
@@ -137,7 +146,6 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
       return;
     }
 
-    // Guardamos el usuario actualizándolo con los parámetros que nos manden
     const newLastName = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.lastName ? req.body.lastName : userToUpdate.get("lastName");
     const newFirstName = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.firstName ? req.body.firstName : userToUpdate.get("firstName");
     const newEmail = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.email ? req.body.email : userToUpdate.get("email");
@@ -164,8 +172,9 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, password } = req.body;
     // Todos los usuarios creados se puede logar con su password y su email
+    const { email, password } = req.body;
+
     if (!email || !password) {
       throw new CustomError("Se deben especificar los campos email y password", 400);
     }
@@ -174,13 +183,12 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
     if (!user) {
       throw new CustomError("Email y/o contraseña incorrectos.", 401);
     }
-    // Comprueba la password
+
     const userPassword: string = user.password;
     const match = await bcrypt.compare(password, userPassword);
     if (!match) {
       throw new CustomError("Contraseña incorrecta.", 401);
     }
-    // Generamos token JWT
 
     const userToSend = user.toObject(user);
     delete userToSend.password;

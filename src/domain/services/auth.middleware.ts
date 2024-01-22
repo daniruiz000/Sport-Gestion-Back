@@ -1,5 +1,5 @@
 import { CustomError } from "../../server/checkError.middleware";
-import { User } from "../entities/user-entity";
+import { userOdm } from "../odm/user.odm";
 import { verifyToken } from "../utils/token";
 
 import { Request, Response, NextFunction } from "express";
@@ -14,12 +14,10 @@ export const isAuth = async (req: Request, res: Response, next: NextFunction): P
 
     const decodedInfo = verifyToken(token);
 
-    const user = await User.findOne({ email: decodedInfo.email }).select("+password");
-    if (!user) {
-      throw new CustomError("No existe usuario con ese email.", 400);
-    }
+    const user = await userOdm.getUserByEmail(decodedInfo.email);
 
-    req.user = { id: user.id, team: user.team, rol: user.rol };
+    const userAuthInfo = { id: user.id, team: user.team, rol: user.rol };
+    req.user = userAuthInfo;
     next();
   } catch (error) {
     next(error);

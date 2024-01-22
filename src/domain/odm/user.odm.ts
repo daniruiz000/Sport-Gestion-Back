@@ -2,56 +2,93 @@
 import { ModifyResult } from "mongodb";
 import { User, IUser, IUserCreate, ROL } from "../entities/user-entity";
 import { Document } from "mongoose";
+import { CustomError } from "../../server/checkError.middleware";
 
 const getAllUsersPaginated = async (page: number, limit: number): Promise<IUser[]> => {
-  return await User.find()
+  const userListPaginated = await User.find()
     .populate("team")
     .limit(limit)
     .skip((page - 1) * limit);
+
+  if (!userListPaginated) {
+    throw new CustomError("Usuarios no encontrados.", 400);
+  }
+  return userListPaginated;
 };
 
 const getUserCount = async (): Promise<number> => {
-  return await User.countDocuments();
+  const userCount = await User.countDocuments();
+  if (!userCount) {
+    throw new CustomError("Error al obtener el número de usuarios.", 400);
+  }
+  return userCount;
 };
 
-const getUserById = async (id: string): Promise<Document<IUser> | null> => {
+const getUserById = async (id: string): Promise<Document<IUser>> => {
   const user = await User.findById(id).populate("team");
+  if (!user) {
+    throw new CustomError("Usuario no encontrado.", 400);
+  }
   return user;
 };
 
 const getUserByIdWithPassword = async (id: string): Promise<Document<IUser> | null> => {
   const user = await User.findById(id).populate("team").select("+password");
+  if (!user) {
+    throw new CustomError("Usuario no encontrado.", 400);
+  }
   return user;
 };
 
 const getPlayersByIdTeam = async (teamId: string): Promise<IUser[]> => {
   const players = await User.find({ team: teamId, rol: ROL.PLAYER });
+  if (!players) {
+    throw new CustomError("Problema al buscar usuarios para ese equipo.", 400);
+  }
   return players;
 };
 
 const getPlayersWithoutTeam = async (): Promise<IUser[]> => {
   const players = await User.find({ team: { $in: [null, undefined] }, rol: { $in: [ROL.PLAYER, ROL.MANAGER] } });
-  console.log(players);
+  if (!players) {
+    throw new CustomError("Problema al buscar usuarios sin equipo.", 400);
+  }
   return players;
 };
 
 const getManagerByIdTeam = async (teamId: string): Promise<IUser[]> => {
-  const players = await User.find({ team: teamId, rol: ROL.MANAGER });
-  return players;
+  const manager = await User.find({ team: teamId, rol: ROL.MANAGER });
+  if (!manager) {
+    throw new CustomError("Problema al buscar el manager de ese equipo.", 400);
+  }
+  return manager;
 };
 
-const getUserByEmailWithPassword = async (emailPassed: string): Promise<Document<IUser> | null> => {
+const getUserByEmailWithPassword = async (emailPassed: string): Promise<IUser> => {
   const user = await User.findOne({ email: emailPassed }).select("+password");
+  if (!user) {
+    throw new CustomError("Usuario no encontrado.", 400);
+  }
   return user;
 };
 
-const createUser = async (userData: IUserCreate): Promise<Document<IUser>> => {
+const getUserByEmail = async (emailPassed: string): Promise<IUser> => {
+  const user = await User.findOne({ email: emailPassed });
+  if (!user) {
+    throw new CustomError("Usuario no encontrado.", 400);
+  }
+  return user;
+};
+
+const createUser = async (userData: IUserCreate): Promise<IUser> => {
   const user = new User(userData);
-  const userSaved: IUser = await user.save();
-  const userCopy = userSaved.toObject();
-  delete userCopy.password;
-  delete userCopy.rol;
-  return userCopy;
+  const userSaved = await user.save();
+
+  if (!userSaved) {
+    throw new CustomError("Problema al registrar el usuario.", 400);
+  }
+
+  return userSaved;
 };
 
 const createUsersFromArray = async (userList: IUserCreate[]): Promise<void> => {
@@ -60,25 +97,45 @@ const createUsersFromArray = async (userList: IUserCreate[]): Promise<void> => {
   }
 };
 
-const deleteUser = async (id: string): Promise<ModifyResult<Document<IUserCreate>> | null> => {
-  return await User.findByIdAndDelete(id);
+const deleteUser = async (id: string): Promise<ModifyResult<Document<IUserCreate>>> => {
+  const userDeleted = await User.findByIdAndDelete(id);
+
+  if (!userDeleted) {
+    throw new CustomError("Problema al borrar el usuario.", 400);
+  }
+  return userDeleted;
 };
 
 const deleteAllUsers = async (): Promise<boolean> => {
-  return await User.collection.drop();
+  const isDeletedUsers = await User.collection.drop();
+  if (!isDeletedUsers) {
+    throw new CustomError("Problema al borrar todos los usuarios.", 400);
+  }
+  return isDeletedUsers;
 };
 
-const updateUser = async (id: string, userData: IUserCreate): Promise<Document<IUser> | null> => {
+const updateUser = async (id: string, userData: IUserCreate): Promise<IUser> => {
   const updateUser = await User.findByIdAndUpdate(id, userData, { new: true, runValidators: true }).select("+password");
+  if (!updateUser) {
+    throw new CustomError("Problema al borrar el usuario.", 400);
+  }
   return updateUser;
 };
 
-const updateRoleUser = async (userId: string, newRole: ROL): Promise<Document<IUser> | null> => {
-  return await User.findByIdAndUpdate(userId, { rol: newRole }, { new: true, runValidators: true });
+const updateRoleUser = async (userId: string, newRole: ROL): Promise<IUser> => {
+  const updateUser = await User.findByIdAndUpdate(userId, { rol: newRole }, { new: true, runValidators: true });
+  if (!updateUser) {
+    throw new CustomError("Problema al actualizar el rol del usuario.", 400);
+  }
+  return updateUser;
 };
 
-const removeTeamFromUser = async (userId: string): Promise<Document<IUser> | null> => {
-  return await User.findByIdAndUpdate(userId, { team: null }, { new: true });
+const removeTeamFromUser = async (userId: string): Promise<IUser> => {
+  const updateUser = await User.findByIdAndUpdate(userId, { team: null }, { new: true });
+  if (!updateUser) {
+    throw new CustomError("Problema al borrar el equipo al usuario.", 400);
+  }
+  return updateUser;
 };
 
 export const userOdm = {
@@ -90,6 +147,7 @@ export const userOdm = {
   getPlayersWithoutTeam,
   getManagerByIdTeam,
   getUserByEmailWithPassword,
+  getUserByEmail,
   createUser,
   createUsersFromArray,
   deleteUser,
