@@ -69,6 +69,7 @@ const getUserByEmailWithPassword = async (emailPassed: string): Promise<IUser> =
   if (!user) {
     throw new CustomError("Usuario no encontrado.", 400);
   }
+
   return user;
 };
 

@@ -1,12 +1,13 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { CustomError } from "../server/checkError.middleware";
+import { ROL } from "../domain/entities/user-entity";
 
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
-export const generateToken = (id: string, email: string, rol: string): string => {
+export const generateToken = (id: string, email: string, rol: ROL): string => {
   const payload = {
     id,
     email,
