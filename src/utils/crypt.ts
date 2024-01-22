@@ -7,7 +7,7 @@ dotenv.config();
 const saltRounds = process.env.SALT_ROUNDS as string;
 
 export const encryptData = async (data: string): Promise<string> => {
-  const rounds = Number(saltRounds);
+  const rounds = parseInt(saltRounds);
   const dataEncrypted = await bcrypt.hash(data, rounds);
   if (!dataEncrypted) {
     throw new CustomError("Error al encriptar los datos.", 401);
