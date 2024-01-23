@@ -3,20 +3,21 @@ import { Request, Response, NextFunction } from "express";
 
 import { IUserCreate, ROL } from "../entities/user-entity";
 import { userOdm } from "../odm/user.odm";
-import { userDto } from "../dto/user.dto";
-import { matchOdm } from "../odm/match.odm";
+import { authDto } from "../dto/auth.dto";
+import { UserAuthInfo } from "../../server/decodedUserToken.middleware";
 
 import { generateToken } from "../../utils/token";
 import { compareEncryptedDataWithData } from "../../utils/crypt";
+import { userDto } from "../dto/user.dto";
 
 export const getUsersPaginated = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // ADMIN
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
-    const userAuthInfo = req.user;
+    const userAuthInfo = req.user as UserAuthInfo;
 
-    userDto.isUserRolAuthForAction(userAuthInfo, [ROL.ADMIN]);
+    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
 
     const users = await userOdm.getAllUsersPaginated(page, limit);
     const totalElements = await userOdm.getUserCount();
@@ -37,20 +38,8 @@ export const getUsersPaginated = async (req: Request, res: Response, next: NextF
 export const getMyUserAllInfo = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // ADMIN / EL PROPIO USUARIO A SÍ MISMO (CUALQUIER USUARIO LOGADO)
-    const userId = req.user.id as string;
-    const userTeam = req.user.team as string;
-
-    const user = await userOdm.getUserById(userId);
-    const playersOnMyTeam = await userOdm.getPlayersByIdTeam(userTeam);
-    const matchsOnMyTeam = await matchOdm.getMatchsByTeamId(userTeam);
-    const manager = req.user.rol === ROL.MANAGER ? userId : await userOdm.getManagerByIdTeam(userTeam);
-
-    const response = {
-      user,
-      playersOnMyTeam: req.user.rol === ROL.ADMIN ? null : playersOnMyTeam,
-      matchsOnMyTeam: req.user.rol === ROL.ADMIN ? null : matchsOnMyTeam,
-      manager: req.user.rol === ROL.ADMIN ? null : manager,
-    };
+    const user = req.user as UserAuthInfo;
+    const response = await userDto.getMyUserAllInfo(user);
 
     res.status(200).json(response);
   } catch (error) {
@@ -62,7 +51,7 @@ export const getPlayersWithoutTeam = async (req: Request, res: Response, next: N
   try {
     //  ADMIN / MANAGER
     const userRol = req.user.rol;
-    userDto.isUserRolAuthForAction(userRol, [ROL.ADMIN, ROL.MANAGER]);
+    authDto.isUserRolAuthToAction(userRol, [ROL.ADMIN, ROL.MANAGER]);
 
     const playersWithoutTeam = await userOdm.getPlayersWithoutTeam();
 
@@ -76,9 +65,10 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
   try {
     //  ADMIN
     const userRol = req.user.rol;
-    userDto.isUserRolAuthForAction(userRol, [ROL.ADMIN]);
-
     const id = req.params.id;
+
+    authDto.isUserRolAuthToAction(userRol, [ROL.ADMIN]);
+
     const user = await userOdm.getUserById(id);
 
     res.status(200).json(user);
@@ -100,17 +90,11 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 
 export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // ADMIN / EL PROPIO USUARIO A SÍ MISMO (CUALQUIER USUARIO LOGADO)/ MANAGER A JUGADORES DE SU EQUIPO
-    const userId = req.user.id;
-    const userRol = req.user.rol;
+    // ADMIN / USUARIO A SÍ MISMO (CUALQUIER USUARIO LOGADO)/ MANAGER A JUGADORES DE SU EQUIPO
+    const user = req.user as UserAuthInfo;
     const userToDeletedId = req.params.id;
 
-    userDto.isUserRolAuthForAction(userRol, [ROL.ADMIN, ROL.MANAGER, ROL.PLAYER]);
-
-    if (userId !== userToDeletedId) {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
+    await authDto.isUserAuthToSpecialAction(user, userToDeletedId);
 
     const userDeleted = await userOdm.deleteUser(userToDeletedId);
 
@@ -122,33 +106,32 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
 
 export const updateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // Solo ADMIN o el propio usuario a sí mismo (cualquier usuario logado) / MANAGER A LOS DE SU EQUIPO
-
+    // ADMIN / USUARIO A SÍ MISMO (CUALQUIER USUARIO LOGADO)/ MANAGER A JUGADORES DE SU EQUIPO
+    const user = req.user as UserAuthInfo;
+    const newDataToUser = req.body;
     const updateUserId = req.params.id;
 
-    if (req.user.rol !== "ADMIN" && req.user.id !== updateUserId && req.user.rol !== "MANAGER") {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
+    await authDto.isUserAuthToSpecialAction(user, updateUserId);
 
     const userToUpdate = await userOdm.getUserByIdWithPassword(updateUserId);
 
-    const newLastName = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.lastName ? req.body.lastName : userToUpdate.get("lastName");
-    const newFirstName = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.firstName ? req.body.firstName : userToUpdate.get("firstName");
-    const newEmail = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.email ? req.body.email : userToUpdate.get("email");
-    const newPassword = req.user.id === updateUserId && req.body.password ? await bcrypt.hash(req.body.password, 10) : userToUpdate.get("password");
-    const newImage = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.image ? req.body.image : userToUpdate.get("image");
-    const newRol = req.user.rol === "ADMIN" ? req.body.rol || userToUpdate.get("rol") : userToUpdate.get("rol");
+    const newFirstName = (user.id === updateUserId || user.rol === "ADMIN") && newDataToUser.firstName ? newDataToUser.firstName : userToUpdate.get("firstName");
+    const newLastName = (user.id === updateUserId || user.rol === "ADMIN") && newDataToUser.lastName ? newDataToUser.lastName : userToUpdate.get("lastName");
+    const newEmail = (user.id === updateUserId || user.rol === "ADMIN") && newDataToUser.email ? newDataToUser.email : userToUpdate.get("email");
     const newTeam = (req.user.rol === "MANAGER" && !userToUpdate.get("team")) || (req.user.rol === "MANAGER" && req.user.team?.toString() === userToUpdate.toObject().team?._id.toString()) || req.user.rol === "ADMIN" ? req.body.team : userToUpdate.get("team");
+    const newImage = (user.id === updateUserId || user.rol === "ADMIN") && newDataToUser.image ? newDataToUser.image : userToUpdate.get("image");
+    const newPassword = user.id === updateUserId && newDataToUser.password ? await bcrypt.hash(newDataToUser.password, 10) : userToUpdate.get("password");
+    const newRol = req.user.rol === "ADMIN" ? newDataToUser.rol || userToUpdate.get("rol") : userToUpdate.get("rol");
 
-    const userSended: IUserCreate = JSON.parse(JSON.stringify(userToUpdate));
-    userSended.rol = newRol;
-    userSended.team = newTeam;
+    const userSended: IUserCreate = userToUpdate.toObject();
+
     userSended.firstName = newFirstName;
     userSended.lastName = newLastName;
     userSended.email = newEmail;
+    userSended.team = newTeam;
     userSended.image = newImage;
     userSended.password = newPassword;
+    userSended.rol = newRol;
 
     const userSaved = await userOdm.updateUser(updateUserId, userSended);
 
@@ -160,14 +143,13 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // Todos los usuarios creados se puede logar con su password y su email.
+    // USUARIOS CREADOS se puede logar con su password y su email.
     const emailToCheck = req.body.email;
     const passwordToCheck = req.body.password;
 
     const user = await userOdm.getUserByEmailWithPassword(emailToCheck);
-    const userPassword = user.password;
 
-    await compareEncryptedDataWithData(passwordToCheck, userPassword);
+    await compareEncryptedDataWithData(passwordToCheck, user.password);
 
     const jwtToken = generateToken(user.id, user.email, user.rol);
 

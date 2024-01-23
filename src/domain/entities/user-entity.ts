@@ -4,6 +4,7 @@ import validator from "validator";
 import { Team } from "./team-entity";
 import { encryptData } from "../../utils/crypt";
 import { CustomError } from "../../server/checkError.middleware";
+import { IMatch } from "./match-entity";
 
 const Schema = mongoose.Schema;
 
@@ -11,6 +12,13 @@ export enum ROL {
   PLAYER = "PLAYER",
   MANAGER = "MANAGER",
   ADMIN = "ADMIN",
+}
+
+export interface MyUser {
+  myUser: IUser;
+  playersOnMyTeam: IUser[] | null;
+  matchsOnMyTeam: IMatch[] | null;
+  manager: string | IUser[] | null;
 }
 
 export interface IUserCreate {

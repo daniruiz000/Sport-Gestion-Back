@@ -25,7 +25,7 @@ const getUserCount = async (): Promise<number> => {
   return userCount;
 };
 
-const getUserById = async (id: string): Promise<Document<IUser>> => {
+const getUserById = async (id: string): Promise<IUser> => {
   const user = await User.findById(id).populate("team");
   if (!user) {
     throw new CustomError("Usuario no encontrado.", 400);
@@ -113,7 +113,7 @@ const createUsersFromArray = async (userList: IUserCreate[]): Promise<void> => {
   }
 };
 
-const deleteUser = async (id: string): Promise<ModifyResult<Document<IUserCreate>>> => {
+const deleteUser = async (id: string): Promise<ModifyResult<Document<IUser>>> => {
   const userDeleted = await User.findByIdAndDelete(id);
   if (!userDeleted) {
     throw new CustomError("Problema al borrar el usuario.", 400);
