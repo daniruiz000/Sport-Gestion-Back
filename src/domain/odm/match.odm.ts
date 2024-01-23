@@ -1,37 +1,71 @@
 /* eslint-disable @typescript-eslint/indent */
+import { CustomError } from "../../server/checkError.middleware";
 import { Match, IMatch, IMatchCreate } from "../entities/match-entity";
 import { Document, ModifyResult } from "mongoose";
 
 const getAllMatchsPaginated = async (page: number, limit: number): Promise<IMatch[]> => {
-  return await Match.find()
+  const allMatchesPaginated = await Match.find()
     .limit(limit)
     .skip((page - 1) * limit)
     .populate(["localTeam", "visitorTeam"]);
+
+  if (!allMatchesPaginated) {
+    throw new CustomError("Partidos no encontrados", 400);
+  }
+
+  return allMatchesPaginated;
 };
 
 const getAllMatchs = async (): Promise<IMatch[]> => {
-  return await Match.find().populate(["localTeam", "visitorTeam"]);
+  const allMatchesPaginated = await Match.find().populate(["localTeam", "visitorTeam"]);
+
+  if (!allMatchesPaginated) {
+    throw new CustomError("Partidos no encontrados", 400);
+  }
+
+  return allMatchesPaginated;
 };
 
 const getMatchCount = async (): Promise<number> => {
-  return await Match.countDocuments();
+  const matchCount = await Match.countDocuments();
+
+  if (!matchCount) {
+    throw new CustomError("Error al obtener el número de partidos.", 400);
+  }
+
+  return matchCount;
 };
 
-const getMatchById = async (id: string): Promise<Document<IMatch> | null> => {
-  return await Match.findById(id).populate(["localTeam", "visitorTeam"]);
+const getMatchById = async (id: string): Promise<IMatch> => {
+  const match = await Match.findById(id).populate(["localTeam", "visitorTeam"]);
+
+  if (!match) {
+    throw new CustomError("Partido no encontrado.", 400);
+  }
+
+  return match;
 };
 
 const getMatchsByTeamId = async (teamId: string): Promise<IMatch[]> => {
-  return await Match.find({
+  const match = await Match.find({
     $or: [{ localTeam: teamId }, { visitorTeam: teamId }],
   }).populate(["localTeam", "visitorTeam"]);
+
+  if (!match) {
+    throw new CustomError("Partido no encontrado.", 400);
+  }
+
+  return match;
 };
 
-const createMatch = async (matchData: IMatchCreate): Promise<Document<IMatch>> => {
-  const match = new Match(matchData);
-  const document: Document<IMatch> = (await match.save()) as any;
+const createMatch = async (matchData: IMatchCreate): Promise<IMatch> => {
+  const savedMatch = await Match.create(matchData);
 
-  return document;
+  if (!savedMatch) {
+    throw new CustomError("Partido no encontrado.", 400);
+  }
+
+  return savedMatch;
 };
 
 const createMatchsFromArray = async (matchList: IMatchCreate[]): Promise<void> => {
@@ -40,16 +74,34 @@ const createMatchsFromArray = async (matchList: IMatchCreate[]): Promise<void> =
   }
 };
 
-const deleteMatch = async (id: string): Promise<ModifyResult<Document<IMatch>> | null> => {
-  return await Match.findByIdAndDelete(id);
+const deleteMatch = async (id: string): Promise<ModifyResult<IMatch>> => {
+  const matchToDelete = await Match.findByIdAndDelete(id);
+
+  if (!matchToDelete) {
+    throw new CustomError("Problema al borrar el partido.", 204);
+  }
+
+  return matchToDelete;
 };
 
 const deleteAllMatch = async (): Promise<boolean> => {
-  return await Match.collection.drop();
+  const isDeletedMatches = await Match.collection.drop();
+
+  if (!isDeletedMatches) {
+    throw new CustomError("Problema al borrar todos los partidos.", 204);
+  }
+
+  return isDeletedMatches;
 };
 
 const updateMatch = async (id: string, matchData: IMatchCreate): Promise<Document<IMatch> | null> => {
-  return await Match.findByIdAndUpdate(id, matchData, { new: true, runValidators: true });
+  const matchToUpdate = await Match.findByIdAndUpdate(id, matchData, { new: true, runValidators: true });
+
+  if (!matchToUpdate) {
+    throw new CustomError("Problema al actualizar el partido.", 400);
+  }
+
+  return matchToUpdate;
 };
 
 export const matchOdm = {

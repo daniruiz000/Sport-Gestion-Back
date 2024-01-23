@@ -98,8 +98,8 @@ const getManagerWithoutTeam = async (): Promise<IUser[]> => {
 };
 
 const createUser = async (userData: IUserCreate): Promise<IUser> => {
-  const user = new User(userData);
-  const userSaved = await user.save();
+  const userSaved = await User.create(userData);
+
   if (!userSaved) {
     throw new CustomError("Problema al registrar el usuario.", 400);
   }
@@ -134,7 +134,7 @@ const deleteAllUsers = async (): Promise<boolean> => {
 const updateUser = async (id: string, userData: IUserCreate): Promise<IUser> => {
   const updateUser = await User.findByIdAndUpdate(id, userData, { new: true, runValidators: true });
   if (!updateUser) {
-    throw new CustomError("Problema al borrar el usuario.", 400);
+    throw new CustomError("Problema al actualizar el usuario.", 400);
   }
 
   return updateUser;
