@@ -1,10 +1,10 @@
 import { ITeam } from "../entities/team-entity";
 
-export const shuffleIteamArray = (array: ITeam[]): ITeam[] => {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
+export const shuffleIteamArray = (teamList: ITeam[]): ITeam[] => {
+  const newTeamList = [...teamList];
+  for (let i = newTeamList.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; // Intercambiar elementos aleatoriamente
+    [newTeamList[i], newTeamList[j]] = [newTeamList[j], newTeamList[i]];
   }
-  return newArray;
+  return newTeamList;
 };

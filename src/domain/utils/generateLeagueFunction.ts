@@ -5,14 +5,14 @@ import { shuffleIteamArray } from "./shuffleIteamArray";
 
 export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
   try {
-    const actualDate: Date = new Date()
+    const actualDate: Date = new Date();
     if (actualDate > startDate) {
       console.error("La fecha tiene que ser posterior a la actual");
       return;
     }
 
     const teamsSended = await Team.find();
-    const teams = shuffleIteamArray(teamsSended)
+    const teams = shuffleIteamArray(teamsSended);
 
     if (teams.length === 0) {
       console.error("No hay equipos en la BBDD.");
@@ -20,7 +20,7 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
     }
     if (teams.length % 2 !== 0) {
       console.error("La cantidad de equipos es impar.");
-      return
+      return;
     }
 
     await matchOdm.deleteAllMatch();
@@ -29,7 +29,7 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
     const matches: IMatchCreate[] = [];
     const numTeams = teams.length;
     const numRoundsPerFase = numTeams - 1;
-    let contDate = actualDate
+    let contDate = actualDate;
     // Generar los enfrentamientos de la primera vuelta
     for (let round = 0; round < numRoundsPerFase; round++) {
       const roundMatches: IMatchCreate[] = [];
@@ -55,7 +55,7 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
           played: matchDate < actualDate,
           round: round + 1, // Se incrementa en 1 para indicar la ronda actual
         };
-        contDate = matchDate
+        contDate = matchDate;
         roundMatches.push(match);
       }
 
@@ -97,7 +97,7 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
 
     // Guardar los partidos en la base de datos.
     await matchOdm.createMatchsFromArray(matches);
-    const matchSort = matches.sort((a, b) => a.round - b.round)
+    const matchSort = matches.sort((a, b) => a.round - b.round);
     for (let i = 0; i < matchSort.length; i++) {
       const match = matches[i];
       const formattedDate = match.date.toLocaleDateString();
@@ -111,7 +111,7 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
       matchesPerRound: numTeams / 2,
     });
     console.log("Liga generada correctamente");
-    return matches
+    return matches;
   } catch (error) {
     console.error(error);
   }

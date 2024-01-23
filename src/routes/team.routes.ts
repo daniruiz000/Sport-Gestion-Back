@@ -1,17 +1,17 @@
 import express from "express";
 
-import { isAuth } from "../domain/services/auth.middleware";
+import { decodedUserToken } from "../server/decodedUserToken.middleware";
 import { teamService } from "../domain/services/team.service";
 import { checkPaginatedParams } from "../server/checkPaginatedParams.middleware";
 
 export const teamRouter = express.Router();
 
-teamRouter.get("/", checkPaginatedParams, isAuth, teamService.getTeamsPaginated);
-teamRouter.get("/:id", isAuth, teamService.getTeamById);
-teamRouter.get("/name/:name", isAuth, teamService.getTeamByName);
-teamRouter.post("/", isAuth, teamService.createTeam);
-teamRouter.delete("/:id", isAuth, teamService.deleteTeam);
-teamRouter.put("/:id", isAuth, teamService.updateTeam);
+teamRouter.get("/", checkPaginatedParams, decodedUserToken, teamService.getTeamsPaginated);
+teamRouter.get("/:id", decodedUserToken, teamService.getTeamById);
+teamRouter.get("/name/:name", decodedUserToken, teamService.getTeamByName);
+teamRouter.post("/", decodedUserToken, teamService.createTeam);
+teamRouter.delete("/:id", decodedUserToken, teamService.deleteTeam);
+teamRouter.put("/:id", decodedUserToken, teamService.updateTeam);
 
 /**
  * @swagger

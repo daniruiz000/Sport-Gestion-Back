@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { matchOdm } from "../odm/match.odm";
 import { generateLeagueFunction } from "../utils/generateLeagueFunction";
-import { convertDateStringToDate } from "../utils/convertDateStringToDate";
+import { convertDateStringToDate } from "../../utils/convertDateStringToDate";
 import { Match } from "../entities/match-entity";
 import { calculateTeamStatisticsFunction } from "../utils/calculateTeamStatisticsFunction";
 import { teamOdm } from "../odm/team.odm";

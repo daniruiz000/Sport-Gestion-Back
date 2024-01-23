@@ -2,7 +2,7 @@ import { IMatchCreate } from "../../entities/match-entity";
 import { Team } from "../../entities/team-entity";
 import { ROL, User } from "../../entities/user-entity";
 import { matchOdm } from "../../odm/match.odm";
-import { convertDateStringToDate } from "../convertDateStringToDate";
+import { convertDateStringToDate } from "../../../utils/convertDateStringToDate";
 import { generateGoalIds } from "./generateGoals";
 import { shuffleIteamArray } from "../shuffleIteamArray";
 

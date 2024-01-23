@@ -1,10 +1,10 @@
-import { CustomError } from "../../server/checkError.middleware";
-import { userOdm } from "../odm/user.odm";
-import { verifyToken } from "../../utils/token";
+import { CustomError } from "./checkError.middleware";
+import { userOdm } from "../domain/odm/user.odm";
+import { verifyToken } from "../utils/token";
 
 import { Request, Response, NextFunction } from "express";
 
-export const isAuth = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const decodedUserToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     const token = req.headers.authorization?.replace("Bearer ", "");
 

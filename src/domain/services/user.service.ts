@@ -16,10 +16,7 @@ export const getUsersPaginated = async (req: Request, res: Response, next: NextF
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
     const userAuthInfo = req.user;
 
-    const isUserRolAuth = userDto.isUserRolAuthForAction(userAuthInfo, [ROL.ADMIN]);
-    if (!isUserRolAuth) {
-      throw new CustomError("No estás autorizado para realizar la operación.", 409);
-    }
+    userDto.isUserRolAuthForAction(userAuthInfo, [ROL.ADMIN]);
 
     const users = await userOdm.getAllUsersPaginated(page, limit);
     const totalElements = await userOdm.getUserCount();

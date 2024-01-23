@@ -7,15 +7,17 @@ import { userOdm } from "../odm/user.odm";
 import { teamDto } from "./team.dto";
 
 const isUserRolAuthForAction = (userAuthInfo: any, authRoles: ROL[]): boolean => {
-  let isAuth = false;
+  let isUserRolAuth = false;
 
   for (const authRol of authRoles) {
     if (authRol === userAuthInfo.rol) {
-      isAuth = true;
+      isUserRolAuth = true;
     }
   }
-
-  return isAuth;
+  if (!isUserRolAuth) {
+    throw new CustomError("No estás autorizado para realizar la operación.", 409);
+  }
+  return isUserRolAuth;
 };
 
 const getAllUsersPaginated = async (page: number, limit: number): Promise<IUser[]> => {
