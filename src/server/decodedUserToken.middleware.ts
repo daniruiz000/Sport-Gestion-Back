@@ -9,7 +9,7 @@ export const decodedUserToken = async (req: Request, res: Response, next: NextFu
     const token = req.headers.authorization?.replace("Bearer ", "");
 
     if (!token) {
-      throw new CustomError("No tienes token", 400);
+      throw new CustomError("Introduzca un token valido.", 400);
     }
 
     const decodedInfo = verifyToken(token);

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/indent */
 import { ModifyResult } from "mongodb";
 import { User, IUser, IUserCreate, ROL } from "../entities/user-entity";
 import { Document } from "mongoose";
@@ -32,11 +31,28 @@ const getUserById = async (id: string): Promise<Document<IUser>> => {
   return user;
 };
 
-const getUserByIdWithPassword = async (id: string): Promise<Document<IUser> | null> => {
+const getUserByIdWithPassword = async (id: string): Promise<IUser> => {
   const user = await User.findById(id).populate("team").select("+password");
   if (!user) {
     throw new CustomError("Usuario no encontrado.", 400);
   }
+  return user;
+};
+
+const getUserByEmail = async (emailPassed: string): Promise<IUser> => {
+  const user = await User.findOne({ email: emailPassed });
+  if (!user) {
+    throw new CustomError("Usuario no encontrado.", 400);
+  }
+  return user;
+};
+
+const getUserByEmailWithPassword = async (emailPassed: string): Promise<IUser> => {
+  const user = await User.findOne({ email: emailPassed }).select("+password");
+  if (!user) {
+    throw new CustomError("Usuario no encontrado.", 400);
+  }
+
   return user;
 };
 
@@ -64,21 +80,12 @@ const getManagerByIdTeam = async (teamId: string): Promise<IUser[]> => {
   return manager;
 };
 
-const getUserByEmailWithPassword = async (emailPassed: string): Promise<IUser> => {
-  const user = await User.findOne({ email: emailPassed }).select("+password");
-  if (!user) {
-    throw new CustomError("Usuario no encontrado.", 400);
+const getManagerWithoutTeam = async (): Promise<IUser[]> => {
+  const manager = await User.find({ team: { $in: [null, undefined] }, rol: ROL.MANAGER });
+  if (!manager) {
+    throw new CustomError("Problema al buscar el manager de ese equipo.", 400);
   }
-
-  return user;
-};
-
-const getUserByEmail = async (emailPassed: string): Promise<IUser> => {
-  const user = await User.findOne({ email: emailPassed });
-  if (!user) {
-    throw new CustomError("Usuario no encontrado.", 400);
-  }
-  return user;
+  return manager;
 };
 
 const createUser = async (userData: IUserCreate): Promise<IUser> => {
@@ -123,22 +130,6 @@ const updateUser = async (id: string, userData: IUserCreate): Promise<IUser> => 
   return updateUser;
 };
 
-const updateRoleUser = async (userId: string, newRole: ROL): Promise<IUser> => {
-  const updateUser = await User.findByIdAndUpdate(userId, { rol: newRole }, { new: true, runValidators: true });
-  if (!updateUser) {
-    throw new CustomError("Problema al actualizar el rol del usuario.", 400);
-  }
-  return updateUser;
-};
-
-const removeTeamFromUser = async (userId: string): Promise<IUser> => {
-  const updateUser = await User.findByIdAndUpdate(userId, { team: null }, { new: true });
-  if (!updateUser) {
-    throw new CustomError("Problema al borrar el equipo al usuario.", 400);
-  }
-  return updateUser;
-};
-
 export const userOdm = {
   getAllUsersPaginated,
   getUserCount,
@@ -147,6 +138,7 @@ export const userOdm = {
   getPlayersByIdTeam,
   getPlayersWithoutTeam,
   getManagerByIdTeam,
+  getManagerWithoutTeam,
   getUserByEmailWithPassword,
   getUserByEmail,
   createUser,
@@ -154,7 +146,4 @@ export const userOdm = {
   deleteUser,
   deleteAllUsers,
   updateUser,
-  updateRoleUser,
-
-  removeTeamFromUser,
 };

@@ -1,12 +1,12 @@
 import bcrypt from "bcrypt";
 import { Request, Response, NextFunction } from "express";
 
-import { generateToken } from "../../utils/token";
+import { IUserCreate, ROL } from "../entities/user-entity";
+import { userOdm } from "../odm/user.odm";
 import { userDto } from "../dto/user.dto";
 import { matchOdm } from "../odm/match.odm";
-import { IUserCreate, ROL } from "../entities/user-entity";
-import { CustomError } from "../../server/checkError.middleware";
-import { userOdm } from "../odm/user.odm";
+
+import { generateToken } from "../../utils/token";
 import { compareEncryptedDataWithData } from "../../utils/crypt";
 
 export const getUsersPaginated = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -28,7 +28,7 @@ export const getUsersPaginated = async (req: Request, res: Response, next: NextF
       data: users,
     };
 
-    res.json(response);
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
@@ -52,7 +52,7 @@ export const getMyUserAllInfo = async (req: Request, res: Response, next: NextFu
       manager: req.user.rol === ROL.ADMIN ? null : manager,
     };
 
-    res.json(response);
+    res.status(200).json(response);
   } catch (error) {
     next(error);
   }
@@ -62,17 +62,11 @@ export const getPlayersWithoutTeam = async (req: Request, res: Response, next: N
   try {
     //  ADMIN / MANAGER
     const userRol = req.user.rol;
+    userDto.isUserRolAuthForAction(userRol, [ROL.ADMIN, ROL.MANAGER]);
 
-    const isUserRolAuth = userDto.isUserRolAuthForAction(userRol, [ROL.ADMIN, ROL.MANAGER]);
-    if (!isUserRolAuth) {
-      throw new CustomError("No estás autorizado para realizar la operación.", 409);
-    }
-    const players = await userOdm.getPlayersWithoutTeam();
-    if (!players.length) {
-      res.status(404).json({ error: "No existen jugadores sin equipo" });
-    } else {
-      res.json(players);
-    }
+    const playersWithoutTeam = await userOdm.getPlayersWithoutTeam();
+
+    res.status(200).json(playersWithoutTeam);
   } catch (error) {
     next(error);
   }
@@ -82,17 +76,12 @@ export const getUserById = async (req: Request, res: Response, next: NextFunctio
   try {
     //  ADMIN
     const userRol = req.user.rol;
-    const isUserRolAuth = userDto.isUserRolAuthForAction(userRol, [ROL.ADMIN]);
-    if (!isUserRolAuth) {
-      throw new CustomError("No estás autorizado para realizar la operación.", 409);
-    }
+    userDto.isUserRolAuthForAction(userRol, [ROL.ADMIN]);
+
     const id = req.params.id;
     const user = await userOdm.getUserById(id);
-    if (!user) {
-      res.status(404).json({ error: "No existe el usuario" });
-      return;
-    }
-    res.json(user);
+
+    res.status(200).json(user);
   } catch (error) {
     next(error);
   }
@@ -102,6 +91,7 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
   try {
     // NO LOGADO
     const createdUser = await userOdm.createUser(req.body);
+
     res.status(201).json(createdUser);
   } catch (error) {
     next(error);
@@ -111,17 +101,19 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
 export const deleteUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // ADMIN / EL PROPIO USUARIO A SÍ MISMO (CUALQUIER USUARIO LOGADO)/ MANAGER A JUGADORES DE SU EQUIPO
-    const deletedUserId = req.params.id;
-    if (req.user.rol !== "ADMIN" && req.user.id !== deletedUserId) {
+    const userId = req.user.id;
+    const userRol = req.user.rol;
+    const userToDeletedId = req.params.id;
+
+    userDto.isUserRolAuthForAction(userRol, [ROL.ADMIN, ROL.MANAGER, ROL.PLAYER]);
+
+    if (userId !== userToDeletedId) {
       res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
       return;
     }
 
-    const userDeleted = await userOdm.deleteUser(deletedUserId);
-    if (!userDeleted) {
-      res.status(404).json({ error: "No existe el usuario" });
-      return;
-    }
+    const userDeleted = await userOdm.deleteUser(userToDeletedId);
+
     res.json(userDeleted);
   } catch (error) {
     next(error);
@@ -140,10 +132,6 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     }
 
     const userToUpdate = await userOdm.getUserByIdWithPassword(updateUserId);
-    if (!userToUpdate) {
-      res.status(404).json({ error: "No existe el usuario para actualizar" });
-      return;
-    }
 
     const newLastName = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.lastName ? req.body.lastName : userToUpdate.get("lastName");
     const newFirstName = (req.user.id === updateUserId || req.user.rol === "ADMIN") && req.body.firstName ? req.body.firstName : userToUpdate.get("firstName");
@@ -161,8 +149,9 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     userSended.email = newEmail;
     userSended.image = newImage;
     userSended.password = newPassword;
+
     const userSaved = await userOdm.updateUser(updateUserId, userSended);
-    console.log({ userSaved }, { userSended });
+
     res.json(userSaved);
   } catch (error) {
     next(error);
@@ -171,13 +160,14 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
 
 export const login = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // Todos los usuarios creados se puede logar con su password y su email
-    const { email, password } = req.body;
+    // Todos los usuarios creados se puede logar con su password y su email.
+    const emailToCheck = req.body.email;
+    const passwordToCheck = req.body.password;
 
-    const user = await userOdm.getUserByEmailWithPassword(email);
+    const user = await userOdm.getUserByEmailWithPassword(emailToCheck);
     const userPassword = user.password;
 
-    await compareEncryptedDataWithData(password, userPassword);
+    await compareEncryptedDataWithData(passwordToCheck, userPassword);
 
     const jwtToken = generateToken(user.id, user.email, user.rol);
 
