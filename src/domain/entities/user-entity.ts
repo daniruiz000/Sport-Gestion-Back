@@ -81,12 +81,11 @@ const userSchema = new Schema<IUser>(
 userSchema.pre("save", async function (next) {
   try {
     const passwordEncrypted = await encryptData(this.password);
-
-    this.password = passwordEncrypted;
-
     if (!passwordEncrypted) {
       throw new CustomError("Fallo al encriptar la contraseña.", 400);
     }
+
+    this.password = passwordEncrypted;
     next();
   } catch (error) {
     next();
