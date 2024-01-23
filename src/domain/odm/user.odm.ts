@@ -12,6 +12,7 @@ const getAllUsersPaginated = async (page: number, limit: number): Promise<IUser[
   if (!userListPaginated) {
     throw new CustomError("Usuarios no encontrados.", 400);
   }
+
   return userListPaginated;
 };
 
@@ -20,6 +21,7 @@ const getUserCount = async (): Promise<number> => {
   if (!userCount) {
     throw new CustomError("Error al obtener el número de usuarios.", 400);
   }
+
   return userCount;
 };
 
@@ -28,6 +30,7 @@ const getUserById = async (id: string): Promise<Document<IUser>> => {
   if (!user) {
     throw new CustomError("Usuario no encontrado.", 400);
   }
+
   return user;
 };
 
@@ -36,6 +39,7 @@ const getUserByIdWithPassword = async (id: string): Promise<IUser> => {
   if (!user) {
     throw new CustomError("Usuario no encontrado.", 400);
   }
+
   return user;
 };
 
@@ -44,6 +48,7 @@ const getUserByEmail = async (emailPassed: string): Promise<IUser> => {
   if (!user) {
     throw new CustomError("Usuario no encontrado.", 400);
   }
+
   return user;
 };
 
@@ -61,6 +66,7 @@ const getPlayersByIdTeam = async (teamId: string): Promise<IUser[]> => {
   if (!players) {
     throw new CustomError("Problema al buscar usuarios para ese equipo.", 400);
   }
+
   return players;
 };
 
@@ -69,6 +75,7 @@ const getPlayersWithoutTeam = async (): Promise<IUser[]> => {
   if (!players) {
     throw new CustomError("Problema al buscar usuarios sin equipo.", 400);
   }
+
   return players;
 };
 
@@ -77,6 +84,7 @@ const getManagerByIdTeam = async (teamId: string): Promise<IUser[]> => {
   if (!manager) {
     throw new CustomError("Problema al buscar el manager de ese equipo.", 400);
   }
+
   return manager;
 };
 
@@ -85,13 +93,13 @@ const getManagerWithoutTeam = async (): Promise<IUser[]> => {
   if (!manager) {
     throw new CustomError("Problema al buscar el manager de ese equipo.", 400);
   }
+
   return manager;
 };
 
 const createUser = async (userData: IUserCreate): Promise<IUser> => {
   const user = new User(userData);
   const userSaved = await user.save();
-
   if (!userSaved) {
     throw new CustomError("Problema al registrar el usuario.", 400);
   }
@@ -107,10 +115,10 @@ const createUsersFromArray = async (userList: IUserCreate[]): Promise<void> => {
 
 const deleteUser = async (id: string): Promise<ModifyResult<Document<IUserCreate>>> => {
   const userDeleted = await User.findByIdAndDelete(id);
-
   if (!userDeleted) {
     throw new CustomError("Problema al borrar el usuario.", 400);
   }
+
   return userDeleted;
 };
 
@@ -119,6 +127,7 @@ const deleteAllUsers = async (): Promise<boolean> => {
   if (!isDeletedUsers) {
     throw new CustomError("Problema al borrar todos los usuarios.", 400);
   }
+
   return isDeletedUsers;
 };
 
@@ -127,6 +136,7 @@ const updateUser = async (id: string, userData: IUserCreate): Promise<IUser> => 
   if (!updateUser) {
     throw new CustomError("Problema al borrar el usuario.", 400);
   }
+
   return updateUser;
 };
 
