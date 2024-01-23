@@ -68,7 +68,7 @@ const userSchema = new Schema<IUser>(
       unique: true,
       validate: {
         validator: (text: string) => validator.isEmail(text),
-        message: "Email incorrecto",
+        message: "Email introducido con formato incorrecto.",
       },
       required: true,
     },

@@ -10,7 +10,7 @@ const getMyUserAllInfo = async (userAuthInfo: UserAuthInfo): Promise<MyUser> => 
 
   const myUser = await userOdm.getUserById(userAuthInfo.id);
   const playersOnMyTeam = await userOdm.getPlayersByIdTeam(userAuthInfo.team);
-  const matchsOnMyTeam = await matchOdm.getMatchsByTeamId(userAuthInfo.team);
+  const matchsOnMyTeam = await matchOdm.getMatchesByTeamId(userAuthInfo.team);
   const manager = iAmManager ? userAuthInfo.id : await userOdm.getManagerByIdTeam(userAuthInfo.team);
 
   const response = {

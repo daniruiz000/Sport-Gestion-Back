@@ -1,4 +1,4 @@
-import { Schema, model, Document } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface ITeamCreate {
   name: string;
@@ -50,4 +50,4 @@ const teamSchema = new Schema<ITeam>(
   { timestamps: true }
 );
 
-export const Team = model<ITeam>("Team", teamSchema);
+export const Team = mongoose.model<ITeam>("Team", teamSchema);

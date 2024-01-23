@@ -1,61 +1,47 @@
-/* eslint-disable @typescript-eslint/indent */
 import { CustomError } from "../../server/checkError.middleware";
 import { Match, IMatch, IMatchCreate } from "../entities/match-entity";
-import { Document, ModifyResult } from "mongoose";
+import { ModifyResult } from "mongoose";
 
-const getAllMatchsPaginated = async (page: number, limit: number): Promise<IMatch[]> => {
-  const allMatchesPaginated = await Match.find()
-    .limit(limit)
-    .skip((page - 1) * limit)
-    .populate(["localTeam", "visitorTeam"]);
+const getAllMatches = async (): Promise<IMatch[]> => {
+  const allMatches = await Match.find().populate(["localTeam", "visitorTeam"]);
 
-  if (!allMatchesPaginated) {
+  if (!allMatches) {
     throw new CustomError("Partidos no encontrados", 400);
   }
 
-  return allMatchesPaginated;
-};
-
-const getAllMatchs = async (): Promise<IMatch[]> => {
-  const allMatchesPaginated = await Match.find().populate(["localTeam", "visitorTeam"]);
-
-  if (!allMatchesPaginated) {
-    throw new CustomError("Partidos no encontrados", 400);
-  }
-
-  return allMatchesPaginated;
-};
-
-const getMatchCount = async (): Promise<number> => {
-  const matchCount = await Match.countDocuments();
-
-  if (!matchCount) {
-    throw new CustomError("Error al obtener el número de partidos.", 400);
-  }
-
-  return matchCount;
+  return allMatches;
 };
 
 const getMatchById = async (id: string): Promise<IMatch> => {
-  const match = await Match.findById(id).populate(["localTeam", "visitorTeam"]);
+  const matchById = await Match.findById(id).populate(["localTeam", "visitorTeam"]);
 
-  if (!match) {
+  if (!matchById) {
     throw new CustomError("Partido no encontrado.", 400);
   }
 
-  return match;
+  return matchById;
 };
 
-const getMatchsByTeamId = async (teamId: string): Promise<IMatch[]> => {
-  const match = await Match.find({
+const getMatchesByRound = async (round: string): Promise<IMatch[]> => {
+  const allMatchesByRound = await Match.find({ round }).populate(["localTeam", "visitorTeam"]);
+
+  if (!allMatchesByRound) {
+    throw new CustomError("Partidos no encontrados", 400);
+  }
+
+  return allMatchesByRound;
+};
+
+const getMatchesByTeamId = async (teamId: string): Promise<IMatch[]> => {
+  const matchesByTeamId = await Match.find({
     $or: [{ localTeam: teamId }, { visitorTeam: teamId }],
   }).populate(["localTeam", "visitorTeam"]);
 
-  if (!match) {
+  if (!matchesByTeamId) {
     throw new CustomError("Partido no encontrado.", 400);
   }
 
-  return match;
+  return matchesByTeamId;
 };
 
 const createMatch = async (matchData: IMatchCreate): Promise<IMatch> => {
@@ -94,7 +80,7 @@ const deleteAllMatch = async (): Promise<boolean> => {
   return isDeletedMatches;
 };
 
-const updateMatch = async (id: string, matchData: IMatchCreate): Promise<Document<IMatch> | null> => {
+const updateMatch = async (id: string, matchData: IMatchCreate): Promise<IMatch> => {
   const matchToUpdate = await Match.findByIdAndUpdate(id, matchData, { new: true, runValidators: true });
 
   if (!matchToUpdate) {
@@ -105,11 +91,10 @@ const updateMatch = async (id: string, matchData: IMatchCreate): Promise<Documen
 };
 
 export const matchOdm = {
-  getAllMatchs,
-  getAllMatchsPaginated,
-  getMatchCount,
+  getAllMatches,
   getMatchById,
-  getMatchsByTeamId,
+  getMatchesByRound,
+  getMatchesByTeamId,
   createMatch,
   createMatchsFromArray,
   deleteMatch,

@@ -88,15 +88,6 @@ const getManagerByIdTeam = async (teamId: string): Promise<IUser[]> => {
   return manager;
 };
 
-const getManagerWithoutTeam = async (): Promise<IUser[]> => {
-  const manager = await User.find({ team: { $in: [null, undefined] }, rol: ROL.MANAGER });
-  if (!manager) {
-    throw new CustomError("Problema al buscar el manager de ese equipo.", 400);
-  }
-
-  return manager;
-};
-
 const createUser = async (userData: IUserCreate): Promise<IUser> => {
   const userSaved = await User.create(userData);
 
@@ -148,7 +139,6 @@ export const userOdm = {
   getPlayersByIdTeam,
   getPlayersWithoutTeam,
   getManagerByIdTeam,
-  getManagerWithoutTeam,
   getUserByEmailWithPassword,
   getUserByEmail,
   createUser,
