@@ -1,6 +1,6 @@
 import { ModifyResult } from "mongodb";
 import { User, IUser, IUserCreate, ROL } from "../entities/user-entity";
-import { Document } from "mongoose";
+
 import { CustomError } from "../../server/checkError.middleware";
 
 const getAllUsersPaginated = async (page: number, limit: number): Promise<IUser[]> => {
@@ -113,10 +113,10 @@ const createUsersFromArray = async (userList: IUserCreate[]): Promise<void> => {
   }
 };
 
-const deleteUser = async (id: string): Promise<ModifyResult<Document<IUser>>> => {
+const deleteUser = async (id: string): Promise<ModifyResult<IUser>> => {
   const userDeleted = await User.findByIdAndDelete(id);
   if (!userDeleted) {
-    throw new CustomError("Problema al borrar el usuario.", 400);
+    throw new CustomError("Problema al borrar el usuario.", 204);
   }
 
   return userDeleted;
@@ -125,14 +125,14 @@ const deleteUser = async (id: string): Promise<ModifyResult<Document<IUser>>> =>
 const deleteAllUsers = async (): Promise<boolean> => {
   const isDeletedUsers = await User.collection.drop();
   if (!isDeletedUsers) {
-    throw new CustomError("Problema al borrar todos los usuarios.", 400);
+    throw new CustomError("Problema al borrar todos los usuarios.", 204);
   }
 
   return isDeletedUsers;
 };
 
 const updateUser = async (id: string, userData: IUserCreate): Promise<IUser> => {
-  const updateUser = await User.findByIdAndUpdate(id, userData, { new: true, runValidators: true }).select("+password");
+  const updateUser = await User.findByIdAndUpdate(id, userData, { new: true, runValidators: true });
   if (!updateUser) {
     throw new CustomError("Problema al borrar el usuario.", 400);
   }

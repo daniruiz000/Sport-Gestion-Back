@@ -1,13 +1,12 @@
 import { CustomError } from "../../server/checkError.middleware";
-import { ROL } from "../entities/user-entity";
+import { ROL, UserAuthInfo } from "../entities/user-entity";
 import { userOdm } from "../odm/user.odm";
-import { UserAuthInfo } from "../../server/decodedUserToken.middleware";
 
 const itsMySelf = (userId: string, userPassedId: string): boolean => {
   return userId === userPassedId;
 };
 
-export const isPlayerOnMyTeam = async (userRol: ROL, userTeam: string, userToCheckId: string): Promise<boolean> => {
+const iAmManagerAndPlayerIdIsOnMyTeam = async (userRol: ROL, userTeam: string, userToCheckId: string): Promise<boolean> => {
   const userToCheck = await userOdm.getUserById(userToCheckId);
 
   return userToCheck.team === userTeam && userRol === ROL.MANAGER;
@@ -22,7 +21,7 @@ const isUserRolAuthToAction = (userAuthInfo: UserAuthInfo, authRoles: ROL[]): vo
     }
   }
   if (!isUserRolAuth) {
-    throw new CustomError("No estás autorizado para realizar la operación.", 409);
+    throw new CustomError("No estás autorizado para realizar la operación.", 401);
   }
 };
 
@@ -32,18 +31,19 @@ const isUserAuthToSpecialAction = async (userAuthInfo: UserAuthInfo, userToDelet
   const userTeam = userAuthInfo.team;
 
   const itsMySelf = authDto.itsMySelf(userId, userToDeletedId);
-  const itsInMyTeam = await authDto.isPlayerOnMyTeam(userRol, userTeam, userToDeletedId);
+  const iAmManagerAndPlayerIdIsOnMyTeam = await authDto.iAmManagerAndPlayerIdIsOnMyTeam(userRol, userTeam, userToDeletedId);
+  const iAmAdmin = userRol === ROL.ADMIN;
 
-  const isAuth = itsMySelf || itsInMyTeam || userRol === ROL.ADMIN;
+  const isAuth = itsMySelf || iAmManagerAndPlayerIdIsOnMyTeam || iAmAdmin;
 
   if (!isAuth) {
-    throw new CustomError("No estás autorizado para realizar la operación.", 409);
+    throw new CustomError("No estás autorizado para realizar la operación.", 401);
   }
 };
 
 export const authDto = {
   isUserRolAuthToAction,
   itsMySelf,
-  isPlayerOnMyTeam,
+  iAmManagerAndPlayerIdIsOnMyTeam,
   isUserAuthToSpecialAction,
 };

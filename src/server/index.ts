@@ -7,7 +7,6 @@ dotenv.config();
 
 const FRONT_END_URL: string = process.env.FRONT_END_URL as string;
 
-// Configuración del server
 export const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

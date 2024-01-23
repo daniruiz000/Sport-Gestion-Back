@@ -1,15 +1,7 @@
+import { Request, Response, NextFunction } from "express";
 import { CustomError } from "./checkError.middleware";
 import { userOdm } from "../domain/odm/user.odm";
 import { verifyToken } from "../utils/token";
-
-import { Request, Response, NextFunction } from "express";
-import { ROL } from "../domain/entities/user-entity";
-
-export interface UserAuthInfo {
-  id: string;
-  team: string;
-  rol: ROL;
-}
 
 export const decodedUserToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
@@ -23,7 +15,7 @@ export const decodedUserToken = async (req: Request, res: Response, next: NextFu
 
     const user = await userOdm.getUserByEmail(decodedInfo.email);
 
-    const userAuthInfo = { id: user?.id, team: user?.team, rol: user?.rol };
+    const userAuthInfo = { id: user.id as string, team: user.team as string, rol: user.rol };
     req.user = userAuthInfo;
     next();
   } catch (error) {

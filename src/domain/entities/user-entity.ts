@@ -2,9 +2,9 @@ import mongoose, { Document } from "mongoose";
 import validator from "validator";
 
 import { Team } from "./team-entity";
+import { IMatch } from "./match-entity";
 import { encryptData } from "../../utils/crypt";
 import { CustomError } from "../../server/checkError.middleware";
-import { IMatch } from "./match-entity";
 
 const Schema = mongoose.Schema;
 
@@ -14,11 +14,24 @@ export enum ROL {
   ADMIN = "ADMIN",
 }
 
+export interface UserAuthInfo {
+  id: string;
+  team: string;
+  rol: ROL;
+}
+
 export interface MyUser {
   myUser: IUser;
   playersOnMyTeam: IUser[] | null;
   matchsOnMyTeam: IMatch[] | null;
   manager: string | IUser[] | null;
+}
+
+export interface AllUsersPaginated {
+  totalItems: number;
+  totalPages: number;
+  currentPage: any;
+  users: IUser[];
 }
 
 export interface IUserCreate {

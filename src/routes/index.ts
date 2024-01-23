@@ -1,6 +1,7 @@
 import swaggerUiExpress from "swagger-ui-express";
 import swaggerJsDoc from "swagger-jsdoc";
 import { swaggerOptions } from "../swagger-options";
+import { type Express } from "express";
 
 import { homeRouter } from "./home.routes";
 import { userRouter } from "./user.routes";
@@ -12,7 +13,7 @@ import { connect } from "../server/connect.middleware";
 import { checkError } from "../server/checkError.middleware";
 import { disconnect } from "process";
 
-export const configureRoutes = (app: any): any => {
+export const configureRoutes = (app: Express): Express => {
   // Swagger
   const specs = swaggerJsDoc(swaggerOptions);
   app.use("/api-docs", swaggerUiExpress.serve, swaggerUiExpress.setup(specs));
