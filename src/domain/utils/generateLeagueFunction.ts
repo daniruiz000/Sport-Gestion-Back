@@ -28,24 +28,29 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
 
     const matches: IMatchCreate[] = [];
     const numTeams = teams.length;
-    const numRoundsPerFase = numTeams - 1;
-    let contDate = actualDate;
-    // Generar los enfrentamientos de la primera vuelta
-    for (let round = 0; round < numRoundsPerFase; round++) {
+
+    if (numTeams % 2 !== 0) {
+      console.error("La cantidad de equipos debe ser par para aplicar el algoritmo de doble vuelta.");
+      return;
+    }
+
+    const numRounds = (numTeams - 1) * 2;
+
+    for (let round = 1; round <= numRounds / 2; round++) {
       const roundMatches: IMatchCreate[] = [];
 
-      // Generar los partidos de la ronda actual
       for (let i = 0; i < numTeams / 2; i++) {
-        const home = (round + i) % numTeams;
-        const away = (numTeams - 1 - i + round) % numTeams;
+        const home = (i + round) % numTeams;
+        let away = (numTeams - 1 - i + round) % numTeams;
 
-        if (home === away) {
-          // Evitar el enfrentamiento contra sí mismo
-          continue;
+        // Ajustar el índice 'away' si es igual al índice 'home'
+        if (away === home) {
+          away = (away + 1) % numTeams;
         }
 
         const localTeam = teams[home];
         const visitorTeam = teams[away];
+
         const matchDate: Date = new Date(startDate.getTime() + round * 7 * 24 * 60 * 60 * 1000);
 
         const match: IMatchCreate = {
@@ -53,40 +58,34 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
           localTeam,
           visitorTeam,
           played: matchDate < actualDate,
-          round: round + 1, // Se incrementa en 1 para indicar la ronda actual
+          round,
         };
-        contDate = matchDate;
+
         roundMatches.push(match);
       }
 
       matches.push(...roundMatches);
     }
 
-    // Generar los enfrentamientos de la segunda vuelta
-    for (let round = numRoundsPerFase - 1; round >= 0; round--) {
+    // Generar segunda vuelta
+    for (let round = 1; round <= numRounds / 2; round++) {
       const roundMatches: IMatchCreate[] = [];
 
-      // Generar los partidos de la ronda actual
       for (let i = 0; i < numTeams / 2; i++) {
-        const home = (numTeams - 1 - i + round) % numTeams;
-        const away = (round + i) % numTeams;
+        const home = (i + round) % numTeams;
+        const away = (numTeams - 1 - i + round) % numTeams;
 
-        if (home === away) {
-          // Evitar el enfrentamiento contra sí mismo
-          continue;
-        }
+        const localTeam = teams[away]; // Intercambiar home y away para la segunda vuelta
+        const visitorTeam = teams[home];
 
-        const localTeam = teams[home];
-        const visitorTeam = teams[away];
-
-        const matchDate: Date = new Date(contDate.getTime() + round * 7 * 24 * 60 * 60 * 1000);
+        const matchDate: Date = new Date(startDate.getTime() + (round + numRounds / 2) * 7 * 24 * 60 * 60 * 1000);
 
         const match: IMatchCreate = {
           date: matchDate,
           localTeam,
           visitorTeam,
           played: matchDate < actualDate,
-          round: round + numRoundsPerFase + 1, // Se incrementa en 1 para indicar la ronda actual
+          round: round + numRounds / 2, // Ajustar el número de la jornada para la segunda vuelta
         };
 
         roundMatches.push(match);
@@ -95,9 +94,10 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
       matches.push(...roundMatches);
     }
 
-    // Guardar los partidos en la base de datos.
     await matchOdm.createMatchsFromArray(matches);
+
     const matchSort = matches.sort((a, b) => a.round - b.round);
+
     for (let i = 0; i < matchSort.length; i++) {
       const match = matches[i];
       const formattedDate = match.date.toLocaleDateString();
@@ -107,10 +107,11 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
     console.log("Partidos generados correctamente");
     console.log({
       matchesNum: matches.length,
-      numRounds: numRoundsPerFase * 2,
+      numRounds,
       matchesPerRound: numTeams / 2,
     });
     console.log("Liga generada correctamente");
+
     return matches;
   } catch (error) {
     console.error(error);
