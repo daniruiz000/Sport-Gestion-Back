@@ -3,10 +3,6 @@ import { ModifyResult } from "mongodb";
 import { Team, ITeam, ITeamCreate } from "../entities/team-entity";
 import { Document } from "mongoose";
 
-const getAllTeams = async (): Promise<ITeam[]> => {
-  return await Team.find();
-};
-
 const getAllTeamsPaginated = async (page: number, limit: number): Promise<ITeam[]> => {
   return await Team.find()
     .limit(limit)
@@ -55,7 +51,6 @@ const updateTeam = async (id: string, teamData: ITeamCreate): Promise<Document<I
 };
 
 export const teamOdm = {
-  getAllTeams,
   getAllTeamsPaginated,
   getTeamCount,
   getTeamById,

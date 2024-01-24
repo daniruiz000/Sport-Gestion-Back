@@ -9,10 +9,6 @@ export interface IMatchCreate {
   visitorTeam: ITeam;
   goalsLocal?: IUser[];
   goalsVisitor?: IUser[];
-  redCardLocal?: IUser[];
-  redCardVisitor?: IUser[];
-  yellowCardLocal?: IUser[];
-  yellowCardVisitor?: IUser[];
   played: boolean;
   round: number;
 }
@@ -42,30 +38,6 @@ const matchSchema = new Schema<IMatch>(
       },
     ],
     goalsVisitor: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: User,
-      },
-    ],
-    redCardLocal: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: User,
-      },
-    ],
-    redCardVisitor: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: User,
-      },
-    ],
-    yellowCardLocal: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: User,
-      },
-    ],
-    yellowCardVisitor: [
       {
         type: Schema.Types.ObjectId,
         ref: User,
