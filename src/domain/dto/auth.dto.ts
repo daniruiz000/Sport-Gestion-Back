@@ -41,9 +41,22 @@ const isUserAuthToSpecialAction = async (userAuthInfo: UserAuthInfo, userToDelet
   }
 };
 
+const isStartDateCorrect = (startDate: Date): void => {
+  const actualDate: Date = new Date();
+
+  if (!startDate) {
+    throw new CustomError("Tiene que introducir una fecha de inicio con formato:'21/5/4' para realizar esta operación.", 404);
+  }
+
+  if (actualDate > startDate) {
+    throw new CustomError("La fecha tiene que ser posterior a la actual.", 404);
+  }
+};
+
 export const authDto = {
   isUserRolAuthToAction,
   itsMySelf,
   iAmManagerAndPlayerIdIsOnMyTeam,
   isUserAuthToSpecialAction,
+  isStartDateCorrect,
 };

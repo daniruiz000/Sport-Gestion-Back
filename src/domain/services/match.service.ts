@@ -4,10 +4,6 @@ import { UserAuthInfo, ROL } from "../entities/user-entity";
 import { authDto } from "../dto/auth.dto";
 import { matchOdm } from "../odm/match.odm";
 
-import { generateLeagueFunction } from "../utils/generateLeagueFunction";
-import { convertDateStringToDate } from "../../utils/convertDateStringToDate";
-import { calculateTeamStatisticsFunction } from "../utils/calculateTeamStatisticsFunction";
-
 export const getAllMatches = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // NO LOGIN
@@ -94,47 +90,6 @@ export const updateMatch = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-export const calculateTeamStatistics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    // NO LOGIN
-    const matches = await matchOdm.getAllMatches();
-
-    const statistics = await calculateTeamStatisticsFunction(matches);
-
-    res.status(200).json(statistics);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const generateLeague = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    // ADMIN
-    const actualDate: Date = new Date();
-    const userAuthInfo = req.user as UserAuthInfo;
-
-    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
-
-    if (!req.body.startDate) {
-      res.status(404).json({ error: "Tiene que introducir una fecha de inicio con formato:'21/5/4' para realizar esta operación" });
-      return;
-    }
-
-    const startDate = convertDateStringToDate(req.body.startDate);
-
-    if (actualDate > startDate) {
-      res.status(404).json("La fecha tiene que ser posterior a la actual");
-      return;
-    }
-
-    const matchs = await generateLeagueFunction(startDate);
-
-    res.status(200).json(matchs);
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const matchService = {
   getAllMatches,
   getMatchById,
@@ -142,6 +97,4 @@ export const matchService = {
   createMatch,
   deleteMatch,
   updateMatch,
-  generateLeague,
-  calculateTeamStatistics,
 };
