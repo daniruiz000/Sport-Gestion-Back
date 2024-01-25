@@ -46,7 +46,6 @@ export const generateLeagueWithData = async (): Promise<void> => {
         const away = (numTeams - 1 - i + round) % numTeams;
 
         if (home === away) {
-          // Evitar el enfrentamiento contra sí mismo
           continue;
         }
 
@@ -108,7 +107,7 @@ export const generateLeagueWithData = async (): Promise<void> => {
           goalsLocal: localGoals,
           goalsVisitor: visitorGoals,
           played: matchDate < actualDate,
-          round: round + numRoundsPerFase + 1, // Se incrementa en 1 para indicar la ronda actual
+          round: round + numRoundsPerFase + 1,
         };
 
         roundMatches.push(match);
@@ -117,9 +116,10 @@ export const generateLeagueWithData = async (): Promise<void> => {
       matches.push(...roundMatches);
     }
 
-    // Guardar los partidos en la base de datos.
     await matchOdm.createMatchsFromArray(matches);
+
     const matchSort = matches.sort((a, b) => a.round - b.round);
+
     for (let i = 0; i < matchSort.length; i++) {
       const match = matches[i];
       const formattedDate = match.date.toLocaleDateString();

@@ -31,6 +31,8 @@ export const convertDateStringToDate = (dateString: string): Date => {
 export const shuffleIteamArray = (teamList: ITeam[]): ITeam[] => {
   const newTeamList = [...teamList];
 
+  checkAreTeamsCorrectToCreateLeague(newTeamList);
+
   for (let i = newTeamList.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [newTeamList[i], newTeamList[j]] = [newTeamList[j], newTeamList[i]];
@@ -133,31 +135,23 @@ export const generateRandomGoalForIdplayers = (players: IUser[], minId: number, 
   return goalIds;
 };
 
-export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
+export const checkAreTeamsCorrectToCreateLeague = (teams: ITeam[]): void => {
+  if (teams.length === 0) {
+    throw new CustomError("No hay equipos en la BBDD.", 400);
+  }
+
+  if (teams.length % 2 !== 0) {
+    throw new CustomError("La cantidad de equipos debe ser par para aplicar el algoritmo de doble vuelta.", 400);
+  }
+};
+
+export const generateLeagueFunction = async (startDate: Date): Promise<IMatchCreate[] | undefined> => {
   try {
+    const matches: IMatchCreate[] = [];
+
     const teamsSended = await teamOdm.getAllTeams();
     const teams = leagueDto.shuffleIteamArray(teamsSended);
-
-    if (teams.length === 0) {
-      console.error("No hay equipos en la BBDD.");
-      return;
-    }
-    if (teams.length % 2 !== 0) {
-      console.error("La cantidad de equipos es impar.");
-      return;
-    }
-
-    await matchOdm.deleteAllMatch();
-    console.log("Partidos borrados");
-
-    const matches: IMatchCreate[] = [];
     const numTeams = teams.length;
-
-    if (numTeams % 2 !== 0) {
-      console.error("La cantidad de equipos debe ser par para aplicar el algoritmo de doble vuelta.");
-      return;
-    }
-
     const numRounds = (numTeams - 1) * 2;
 
     for (let round = 1; round <= numRounds / 2; round++) {
@@ -167,7 +161,6 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
         const home = (i + round) % numTeams;
         let away = (numTeams - 1 - i + round) % numTeams;
 
-        // Ajustar el índice 'away' si es igual al índice 'home'
         if (away === home) {
           away = (away + 1) % numTeams;
         }
@@ -200,7 +193,7 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
         const home = (i + round) % numTeams;
         const away = (numTeams - 1 - i + round) % numTeams;
 
-        const localTeam = teams[away]; // Intercambiar home y away para la segunda vuelta
+        const localTeam = teams[away];
         const visitorTeam = teams[home];
 
         const matchDate: Date = new Date(startDate.getTime() + (round + numRounds / 2) * 7 * 24 * 60 * 60 * 1000);
@@ -211,7 +204,7 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
           localTeam,
           visitorTeam,
           played: matchDate < actualDate,
-          round: round + numRounds / 2, // Ajustar el número de la jornada para la segunda vuelta
+          round: round + numRounds / 2,
         };
 
         roundMatches.push(match);
@@ -219,6 +212,9 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
 
       matches.push(...roundMatches);
     }
+
+    await matchOdm.deleteAllMatch();
+    console.log("Partidos borrados");
 
     await matchOdm.createMatchsFromArray(matches);
 
