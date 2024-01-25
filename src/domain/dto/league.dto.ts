@@ -150,11 +150,14 @@ export const generateLeagueFunction = async (startDate: Date): Promise<IMatchCre
     const matches: IMatchCreate[] = [];
 
     const teamsSended = await teamOdm.getAllTeams();
+
     const teams = leagueDto.shuffleIteamArray(teamsSended);
+
     const numTeams = teams.length;
     const numRounds = (numTeams - 1) * 2;
+    const numMatchesPerRound = numRounds / 2;
 
-    for (let round = 1; round <= numRounds / 2; round++) {
+    for (let round = 1; round <= numMatchesPerRound; round++) {
       const roundMatches: IMatchCreate[] = [];
 
       for (let i = 0; i < numTeams / 2; i++) {
@@ -170,12 +173,13 @@ export const generateLeagueFunction = async (startDate: Date): Promise<IMatchCre
 
         const matchDate: Date = new Date(startDate.getTime() + round * 7 * 24 * 60 * 60 * 1000);
         const actualDate = new Date();
+        const played = matchDate < actualDate;
 
         const match: IMatchCreate = {
           date: matchDate,
           localTeam,
           visitorTeam,
-          played: matchDate < actualDate,
+          played,
           round,
         };
 
@@ -186,7 +190,7 @@ export const generateLeagueFunction = async (startDate: Date): Promise<IMatchCre
     }
 
     // Generar segunda vuelta
-    for (let round = 1; round <= numRounds / 2; round++) {
+    for (let round = 1; round <= numMatchesPerRound; round++) {
       const roundMatches: IMatchCreate[] = [];
 
       for (let i = 0; i < numTeams / 2; i++) {
@@ -196,15 +200,16 @@ export const generateLeagueFunction = async (startDate: Date): Promise<IMatchCre
         const localTeam = teams[away];
         const visitorTeam = teams[home];
 
-        const matchDate: Date = new Date(startDate.getTime() + (round + numRounds / 2) * 7 * 24 * 60 * 60 * 1000);
+        const matchDate: Date = new Date(startDate.getTime() + (round + numMatchesPerRound) * 7 * 24 * 60 * 60 * 1000);
         const actualDate = new Date();
+        const played = matchDate < actualDate;
 
         const match: IMatchCreate = {
           date: matchDate,
           localTeam,
           visitorTeam,
-          played: matchDate < actualDate,
-          round: round + numRounds / 2,
+          played,
+          round: round + numMatchesPerRound,
         };
 
         roundMatches.push(match);
@@ -214,33 +219,37 @@ export const generateLeagueFunction = async (startDate: Date): Promise<IMatchCre
     }
 
     await matchOdm.deleteAllMatch();
-    console.log("Partidos borrados");
 
     await matchOdm.createMatchsFromArray(matches);
 
     const matchSort = matches.sort((a, b) => a.round - b.round);
 
-    for (let i = 0; i < matchSort.length; i++) {
-      const match = matches[i];
-      const formattedDate = match.date.toLocaleDateString();
-      const status = match.played ? "Jugado" : "Pendiente";
-      console.log(`Jornada ${match.round} Partido: ${match.localTeam.name} / ${match.visitorTeam.name} Fecha ${formattedDate} - ${status}`);
-    }
-    console.log("Partidos generados correctamente");
-    console.log({
-      matchesNum: matches.length,
-      numRounds,
-      matchesPerRound: numTeams / 2,
-    });
-    console.log("Liga generada correctamente");
+    leagueDto.showDataLeague(matchSort, matches, numTeams, numRounds);
 
-    return matches;
+    return matchSort;
   } catch (error) {
     console.error(error);
   }
 };
 
+const showDataLeague = (matchSort: IMatchCreate[], matches: IMatchCreate[], numTeams: number, numRounds: number): void => {
+  for (let i = 0; i < matchSort.length; i++) {
+    const match = matches[i];
+    const formattedDate = match.date.toLocaleDateString();
+    const status = match.played ? "Jugado" : "Pendiente";
+    console.log(`Jornada ${match.round} Partido: ${match.localTeam.name} / ${match.visitorTeam.name} Fecha ${formattedDate} - ${status}`);
+  }
+  console.log("Partidos generados correctamente");
+  console.log({
+    matchesNum: matches.length,
+    numRounds,
+    matchesPerRound: numTeams / 2,
+  });
+  console.log("Liga generada correctamente");
+};
+
 export const leagueDto = {
+  showDataLeague,
   validateAndParsedStartDate,
   convertDateStringToDate,
   shuffleIteamArray,
