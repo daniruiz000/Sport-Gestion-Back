@@ -1,17 +1,18 @@
 import { Request, Response, NextFunction } from "express";
 import { teamOdm } from "../odm/team.odm";
 import { userOdm } from "../odm/user.odm";
+import { authDto } from "../dto/auth.dto";
+import { UserAuthInfo, ROL } from "../entities/user-entity";
 
 export const getTeamsPaginated = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    // ADMIN
+
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+    const userAuthInfo = req.user as UserAuthInfo;
 
-    // ADMIN
-    if (req.user.rol !== "ADMIN") {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
+    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
 
     const teams = await teamOdm.getAllTeamsPaginated(page, limit);
 
@@ -42,16 +43,14 @@ export const getTeamsPaginated = async (req: Request, res: Response, next: NextF
 export const getTeamById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     //  ADMIN
+
     const teamId = req.params.id;
-    if (req.user.rol !== "ADMIN" && req.user.team?.toString() !== teamId) {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
+    const userAuthInfo = req.user as UserAuthInfo;
+
+    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
+
     const team = await teamOdm.getTeamById(teamId);
-    if (!team) {
-      res.status(404).json({ error: "No existe el equipo" });
-      return;
-    }
+
     res.json(team);
   } catch (error) {
     next(error);
@@ -59,17 +58,16 @@ export const getTeamById = async (req: Request, res: Response, next: NextFunctio
 };
 
 export const getTeamByName = async (req: any, res: Response, next: NextFunction): Promise<void> => {
-  const name = req.params.name;
-
   try {
-    if (req.user.rol !== "ADMIN") {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
+    // ADMIN
+
+    const name = req.params.name;
+    const userAuthInfo = req.user as UserAuthInfo;
+
+    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
+
     const team = await teamOdm.getTeamByName(name);
-    if (!team) {
-      res.status(404).json({ error: "No existe el equipo" });
-    }
+
     res.json(team);
   } catch (error) {
     next(error);
@@ -78,13 +76,14 @@ export const getTeamByName = async (req: any, res: Response, next: NextFunction)
 
 export const createTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // Sólo ADMIN
-    if (req.user.rol !== "ADMIN") {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
+    // ADMIN
+
+    const userAuthInfo = req.user as UserAuthInfo;
+
+    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
 
     const createdTeam = await teamOdm.createTeam(req.body);
+
     res.status(201).json(createdTeam);
   } catch (error) {
     next(error);
@@ -93,18 +92,16 @@ export const createTeam = async (req: Request, res: Response, next: NextFunction
 
 export const deleteTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // Sólo ADMIN
+    // ADMIN / MANAGER a su propio equipo
+
     const id = req.params.id;
-    if (req.user.rol !== "ADMIN") {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
+
+    const userAuthInfo = req.user as UserAuthInfo;
+
+    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
 
     const teamDeleted = await teamOdm.deleteTeam(id);
-    if (!teamDeleted) {
-      res.status(404).json({ error: "No existe el equipo" });
-      return;
-    }
+
     res.json(teamDeleted);
   } catch (error) {
     next(error);
@@ -113,22 +110,20 @@ export const deleteTeam = async (req: Request, res: Response, next: NextFunction
 
 export const updateTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
+    // ADMIN / MANAGER a su propio equipo
+
     const id = req.params.id;
-    // Sólo ADMIN y MANAGER
-    if (req.user.rol !== "ADMIN" && req.user.rol !== "MANAGER" && req.user.team !== id) {
-      res.status(401).json({ error: "No tienes autorización para realizar esta operación" });
-      return;
-    }
+
+    const userAuthInfo = req.user as UserAuthInfo;
+
+    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
 
     const teamToUpdate = await teamOdm.getTeamById(id);
-    if (!teamToUpdate) {
-      res.status(404).json({ error: "No existe el equipo" });
-      return;
-    }
 
-    // Guardamos el equipo actualizandolo con los parametros que nos manden
     Object.assign(teamToUpdate, req.body);
+
     const teamToSend = await teamToUpdate.save();
+
     res.json(teamToSend);
   } catch (error) {
     next(error);

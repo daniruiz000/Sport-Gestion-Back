@@ -2,14 +2,12 @@ import { IMatchCreate } from "../../entities/match-entity";
 import { Team } from "../../entities/team-entity";
 import { ROL, User } from "../../entities/user-entity";
 import { matchOdm } from "../../odm/match.odm";
-import { convertDateStringToDate } from "../../../utils/convertDateStringToDate";
-import { generateGoalIds } from "./generateGoals";
-import { shuffleIteamArray } from "../shuffleIteamArray";
+import { leagueDto } from "../../dto/league.dto";
 
 export const generateLeagueWithData = async (): Promise<void> => {
   try {
     const teamsSended = await Team.find();
-    const teams = shuffleIteamArray(teamsSended);
+    const teams = leagueDto.shuffleIteamArray(teamsSended);
 
     if (teams.length === 0) {
       console.error("No hay equipos en la BBDD.");
@@ -34,7 +32,7 @@ export const generateLeagueWithData = async (): Promise<void> => {
     const numTeams = teams.length;
     const numRoundsPerFase = numTeams - 1;
     const actualDate = new Date();
-    const startDate = convertDateStringToDate("22/5/22");
+    const startDate = leagueDto.convertDateStringToDate("22/5/22");
     let contDate = startDate;
 
     // Generar los enfrentamientos de la primera vuelta
@@ -59,8 +57,8 @@ export const generateLeagueWithData = async (): Promise<void> => {
 
         const matchDate: Date = new Date(startDate.getTime() + round * 7 * 24 * 60 * 60 * 1000);
 
-        const localGoals = generateGoalIds(localPlayers, 0, 3);
-        const visitorGoals = generateGoalIds(visitorPlayers, 0, 3);
+        const localGoals = leagueDto.generateRandomGoalForIdplayers(localPlayers, 0, 3);
+        const visitorGoals = leagueDto.generateRandomGoalForIdplayers(visitorPlayers, 0, 3);
 
         const match: IMatchCreate = {
           date: matchDate,
@@ -100,8 +98,8 @@ export const generateLeagueWithData = async (): Promise<void> => {
 
         const matchDate: Date = new Date(contDate.getTime() + (round + numRoundsPerFase) * 7 * 24 * 60 * 60 * 1000);
 
-        const localGoals = generateGoalIds(localPlayers, 0, 3);
-        const visitorGoals = generateGoalIds(visitorPlayers, 0, 3);
+        const localGoals = leagueDto.generateRandomGoalForIdplayers(localPlayers, 0, 3);
+        const visitorGoals = leagueDto.generateRandomGoalForIdplayers(visitorPlayers, 0, 3);
 
         const match: IMatchCreate = {
           date: matchDate,

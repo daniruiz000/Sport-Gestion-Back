@@ -1,35 +1,67 @@
-/* eslint-disable @typescript-eslint/indent */
 import { ModifyResult } from "mongodb";
 import { Team, ITeam, ITeamCreate } from "../entities/team-entity";
-import { Document } from "mongoose";
+import { CustomError } from "../../server/checkError.middleware";
+
+const getAllTeams = async (): Promise<ITeam[]> => {
+  const teams = await Team.find();
+
+  if (!teams) {
+    throw new CustomError("Equipos no encontrados.", 400);
+  }
+
+  return teams;
+};
 
 const getAllTeamsPaginated = async (page: number, limit: number): Promise<ITeam[]> => {
-  return await Team.find()
+  const teams = await Team.find()
     .limit(limit)
     .skip((page - 1) * limit);
+
+  if (!teams) {
+    throw new CustomError("Equipos no encontrados.", 400);
+  }
+
+  return teams;
 };
 
 const getTeamCount = async (): Promise<number> => {
-  return await Team.countDocuments();
+  const teamsCount = await Team.countDocuments();
+
+  if (!teamsCount) {
+    throw new CustomError("Equipos no encontrados.", 400);
+  }
+
+  return teamsCount;
 };
 
-const getTeamById = async (id: string): Promise<Document<ITeam> | null> => {
-  return await Team.findById(id);
+const getTeamById = async (id: string): Promise<ITeam> => {
+  const team = await Team.findById(id);
+
+  if (!team) {
+    throw new CustomError("Equipo no encontrado.", 400);
+  }
+
+  return team;
 };
 
-const getMyTeam = async (page: number, limit: number): Promise<ITeam[]> => {
-  return await Team.find();
+const getTeamByName = async (name: string): Promise<ITeam | ITeam[]> => {
+  const team = await Team.find({ name: new RegExp("^" + name.toLowerCase(), "i") });
+
+  if (!team) {
+    throw new CustomError("Equipo no encontrado.", 400);
+  }
+
+  return team;
 };
 
-const getTeamByName = async (name: string): Promise<Document<ITeam>[]> => {
-  return await Team.find({ name: new RegExp("^" + name.toLowerCase(), "i") });
-};
+const createTeam = async (teamData: ITeamCreate): Promise<ITeam> => {
+  const team = await Team.create(teamData);
 
-const createTeam = async (teamData: ITeamCreate): Promise<Document<ITeam>> => {
-  const team = new Team(teamData);
-  const document: Document<ITeam> = (await team.save()) as any;
+  if (!team) {
+    throw new CustomError("Equipo no creado.", 400);
+  }
 
-  return document;
+  return team;
 };
 
 const createTeamsFromArray = async (teamList: ITeamCreate[]): Promise<void> => {
@@ -38,23 +70,35 @@ const createTeamsFromArray = async (teamList: ITeamCreate[]): Promise<void> => {
   }
 };
 
-const deleteTeam = async (id: string): Promise<ModifyResult<Document<ITeam>> | null> => {
-  return await Team.findByIdAndDelete(id);
+const deleteTeam = async (id: string): Promise<ModifyResult<ITeam>> => {
+  const team = await Team.findByIdAndDelete(id);
+
+  if (!team) {
+    throw new CustomError("Equipo no borrado.", 400);
+  }
+
+  return team;
 };
 
 const deleteAllTeams = async (): Promise<boolean> => {
   return await Team.collection.drop();
 };
 
-const updateTeam = async (id: string, teamData: ITeamCreate): Promise<Document<ITeam> | null> => {
-  return await Team.findByIdAndUpdate(id, teamData, { new: true, runValidators: true });
+const updateTeam = async (id: string, teamData: ITeamCreate): Promise<ITeam> => {
+  const updateUser = await Team.findByIdAndUpdate(id, teamData, { new: true, runValidators: true });
+
+  if (!updateUser) {
+    throw new CustomError("Problema al actualizar el team.", 400);
+  }
+
+  return updateUser;
 };
 
 export const teamOdm = {
+  getAllTeams,
   getAllTeamsPaginated,
   getTeamCount,
   getTeamById,
-  getMyTeam,
   getTeamByName,
   createTeam,
   createTeamsFromArray,

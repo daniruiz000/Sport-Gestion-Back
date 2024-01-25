@@ -7,6 +7,7 @@ import { homeRouter } from "./home.routes";
 import { userRouter } from "./user.routes";
 import { teamRouter } from "./team.routes";
 import { matchRouter } from "./match.routes";
+import { leagueRouter } from "./league.routes";
 
 import { infoReq } from "../server/infoReq.middleware";
 import { connect } from "../server/connect.middleware";
@@ -21,6 +22,7 @@ export const configureRoutes = (app: Express): Express => {
   app.use("/user", infoReq, connect, userRouter, disconnect);
   app.use("/team", infoReq, connect, teamRouter, disconnect);
   app.use("/match", infoReq, connect, matchRouter, disconnect);
+  app.use("/league", infoReq, connect, leagueRouter, disconnect);
   app.use("/", homeRouter);
 
   app.use(checkError);

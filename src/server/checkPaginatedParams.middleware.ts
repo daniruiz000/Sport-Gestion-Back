@@ -20,13 +20,14 @@ export const checkPaginatedParams = async (req: Request, res: Response, next: Ne
 
 export const checkLoginParamsIsCorrect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const email = req?.body?.email as string;
+    const password = req?.body?.password as string;
 
     if (!email || !password) {
       throw new CustomError("Se deben especificar los campos email y password", 400);
-    } else {
-      next();
     }
+
+    next();
   } catch (error) {
     next(error);
   }
