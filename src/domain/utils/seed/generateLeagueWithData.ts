@@ -1,12 +1,12 @@
 import { IMatchCreate } from "../../entities/match-entity";
-import { Team } from "../../entities/team-entity";
-import { ROL, User } from "../../entities/user-entity";
+import { userOdm } from "../../odm/user.odm";
+import { teamOdm } from "../../odm/team.odm";
 import { matchOdm } from "../../odm/match.odm";
 import { leagueDto } from "../../dto/league.dto";
 
 export const generateLeagueWithData = async (): Promise<void> => {
   try {
-    const teamsSended = await Team.find();
+    const teamsSended = await teamOdm.getAllTeams();
     const teams = leagueDto.shuffleIteamArray(teamsSended);
 
     if (teams.length === 0) {
@@ -19,8 +19,9 @@ export const generateLeagueWithData = async (): Promise<void> => {
       return;
     }
 
-    const players = await User.find({ rol: ROL.PLAYER, team: { $in: teams.map((team) => team.id) } });
-    if (players.length === 0) {
+    const players = await userOdm.getUserCount();
+
+    if (players <= 0) {
       console.error("No hay jugadores en la BBDD.");
       return;
     }
@@ -52,8 +53,8 @@ export const generateLeagueWithData = async (): Promise<void> => {
         const localTeam = teams[home];
         const visitorTeam = teams[away];
 
-        const localPlayers = await User.find({ team: localTeam.id }).populate("team");
-        const visitorPlayers = await User.find({ team: visitorTeam.id }).populate("team");
+        const localPlayers = await userOdm.getPlayersByIdTeam(localTeam.id);
+        const visitorPlayers = await userOdm.getPlayersByIdTeam(visitorTeam.id);
 
         const matchDate: Date = new Date(startDate.getTime() + round * 7 * 24 * 60 * 60 * 1000);
 
@@ -67,7 +68,7 @@ export const generateLeagueWithData = async (): Promise<void> => {
           goalsLocal: localGoals,
           goalsVisitor: visitorGoals,
           played: matchDate < actualDate,
-          round: round + 1, // Se incrementa en 1 para indicar la ronda actual
+          round: round + 1,
         };
         contDate = matchDate;
         roundMatches.push(match);
@@ -86,15 +87,14 @@ export const generateLeagueWithData = async (): Promise<void> => {
         const away = (round + i) % numTeams;
 
         if (home === away) {
-          // Evitar el enfrentamiento contra sí mismo
           continue;
         }
 
         const localTeam = teams[home];
         const visitorTeam = teams[away];
 
-        const localPlayers = await User.find({ team: localTeam.id }).populate("team");
-        const visitorPlayers = await User.find({ team: visitorTeam.id }).populate("team");
+        const localPlayers = await userOdm.getPlayersByIdTeam(localTeam.id);
+        const visitorPlayers = await userOdm.getPlayersByIdTeam(visitorTeam.id);
 
         const matchDate: Date = new Date(contDate.getTime() + (round + numRoundsPerFase) * 7 * 24 * 60 * 60 * 1000);
 

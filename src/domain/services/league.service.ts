@@ -20,24 +20,14 @@ export const calculateTeamStatistics = async (req: Request, res: Response, next:
 export const generateLeague = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // ADMIN
-    const actualDate: Date = new Date();
     const userAuthInfo = req.user as UserAuthInfo;
+    const startDate = req.body.startDate;
 
     authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
 
-    if (!req.body.startDate) {
-      res.status(404).json({ error: "Tiene que introducir una fecha de inicio con formato:'21/5/4' para realizar esta operación" });
-      return;
-    }
+    const startDateVeryfyAndParsedToDate = leagueDto.validateAndParsedStartDate(startDate);
 
-    const startDate = leagueDto.convertDateStringToDate(req.body.startDate);
-
-    if (actualDate > startDate) {
-      res.status(404).json("La fecha tiene que ser posterior a la actual");
-      return;
-    }
-
-    const matchs = await leagueDto.generateLeagueFunction(startDate);
+    const matchs = await leagueDto.generateLeagueFunction(startDateVeryfyAndParsedToDate);
 
     res.status(200).json(matchs);
   } catch (error) {

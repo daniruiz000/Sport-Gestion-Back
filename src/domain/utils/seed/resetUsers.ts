@@ -1,6 +1,6 @@
 import { userList } from "../../../data";
-import { Team } from "../../entities/team-entity";
 import { ROL, IUserCreate } from "../../entities/user-entity";
+import { teamOdm } from "../../odm/team.odm";
 import { userOdm } from "../../odm/user.odm";
 
 export const resetUsers = async (): Promise<void> => {
@@ -12,7 +12,9 @@ export const resetUsers = async (): Promise<void> => {
     const admins = userList.filter((user) => user.rol === ROL.ADMIN);
     const managers = userList.filter((user) => user.rol === ROL.MANAGER);
     const players = userList.filter((user) => user.rol === ROL.PLAYER);
-    const teams = await Team.find();
+
+    const teams = await teamOdm.getAllTeams();
+
     const playersPerTeam = playersWithTeam / teams.length;
     const playersNoTeam = players.length - 50;
 

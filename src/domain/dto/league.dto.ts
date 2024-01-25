@@ -5,7 +5,9 @@ import { IUser } from "../entities/user-entity";
 import { matchOdm } from "../odm/match.odm";
 import { teamOdm } from "../odm/team.odm";
 
-const isValidDate = (startDateString: string, actualDate: Date): void => {
+const validateAndParsedStartDate = (startDateString: string): Date => {
+  const actualDate: Date = new Date();
+
   if (!startDateString) {
     throw new CustomError("Tiene que introducir una fecha de inicio con formato:'21/5/4' para realizar esta operación", 404);
   }
@@ -15,6 +17,8 @@ const isValidDate = (startDateString: string, actualDate: Date): void => {
   if (actualDate > startDate) {
     throw new CustomError("La fecha tiene que ser posterior a la actual", 404);
   }
+
+  return startDate;
 };
 
 export const convertDateStringToDate = (dateString: string): Date => {
@@ -131,14 +135,8 @@ export const generateRandomGoalForIdplayers = (players: IUser[], minId: number, 
 
 export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
   try {
-    const actualDate: Date = new Date();
-    if (actualDate > startDate) {
-      console.error("La fecha tiene que ser posterior a la actual");
-      return;
-    }
-
     const teamsSended = await teamOdm.getAllTeams();
-    const teams = shuffleIteamArray(teamsSended);
+    const teams = leagueDto.shuffleIteamArray(teamsSended);
 
     if (teams.length === 0) {
       console.error("No hay equipos en la BBDD.");
@@ -178,6 +176,7 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
         const visitorTeam = teams[away];
 
         const matchDate: Date = new Date(startDate.getTime() + round * 7 * 24 * 60 * 60 * 1000);
+        const actualDate = new Date();
 
         const match: IMatchCreate = {
           date: matchDate,
@@ -205,6 +204,7 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
         const visitorTeam = teams[home];
 
         const matchDate: Date = new Date(startDate.getTime() + (round + numRounds / 2) * 7 * 24 * 60 * 60 * 1000);
+        const actualDate = new Date();
 
         const match: IMatchCreate = {
           date: matchDate,
@@ -245,7 +245,7 @@ export const generateLeagueFunction = async (startDate: Date): Promise<any> => {
 };
 
 export const leagueDto = {
-  isValidDate,
+  validateAndParsedStartDate,
   convertDateStringToDate,
   shuffleIteamArray,
   calculateTeamStatisticsFunction,
