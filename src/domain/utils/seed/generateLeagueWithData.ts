@@ -4,6 +4,7 @@ import { userOdm } from "../../odm/user.odm";
 import { teamOdm } from "../../odm/team.odm";
 import { matchOdm } from "../../odm/match.odm";
 import { leagueDto } from "../../dto/league.dto";
+import { IUser } from "../../entities/user-entity";
 
 export const generateLeagueWithData = async (startDate: Date): Promise<IMatchCreate[]> => {
   const matchesInLeague: IMatchCreate[] = [];
@@ -62,8 +63,8 @@ export const generateMatchWithData = async (teams: ITeam[], home: number, away: 
   const localPlayers = await userOdm.getPlayersByIdTeam(localTeam.id);
   const visitorPlayers = await userOdm.getPlayersByIdTeam(visitorTeam.id);
 
-  const goalsLocal = leagueDto.generateRandomGoalForIdplayers(localPlayers, 0, 3);
-  const goalsVisitor = leagueDto.generateRandomGoalForIdplayers(visitorPlayers, 0, 3);
+  const goalsLocal = generateRandomGoalForIdplayers(localPlayers, 0, 3);
+  const goalsVisitor = generateRandomGoalForIdplayers(visitorPlayers, 0, 3);
 
   const matchDate = new Date(startDate.getTime() + actualRound * 7 * 24 * 60 * 60 * 1000);
   const actualDate = new Date();
@@ -80,4 +81,16 @@ export const generateMatchWithData = async (teams: ITeam[], home: number, away: 
   };
 
   return match;
+};
+
+const generateRandomGoalForIdplayers = (players: IUser[], minId: number, maxId: number): IUser[] => {
+  const goalIds: IUser[] = [];
+  const numGoals = Math.floor(Math.random() * 4);
+
+  for (let i = 0; i < numGoals; i++) {
+    const playerId = Math.floor(Math.random() * (maxId - minId + 1)) + minId;
+    goalIds.push(players[playerId].id);
+  }
+
+  return goalIds;
 };

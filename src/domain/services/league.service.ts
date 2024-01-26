@@ -10,7 +10,7 @@ export const calculateTeamStatistics = async (req: Request, res: Response, next:
     // NO LOGIN
     const matches = await matchOdm.getAllMatches();
 
-    const statistics = await leagueDto.calculateLeagueStatisticsPerTeam(matches);
+    const statistics = await leagueDto.calculateTeamsStatisticsLeague(matches);
 
     res.status(200).json(statistics);
   } catch (error) {
