@@ -3,13 +3,14 @@ import { authDto } from "../dto/auth.dto";
 import { leagueDto } from "../dto/league.dto";
 import { UserAuthInfo, ROL } from "../entities/user-entity";
 import { matchOdm } from "../odm/match.odm";
+import { teamOdm } from "../odm/team.odm";
 
 export const calculateTeamStatistics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // NO LOGIN
     const matches = await matchOdm.getAllMatches();
 
-    const statistics = await leagueDto.calculateTeamStatisticsFunction(matches);
+    const statistics = await leagueDto.calculateLeagueStatisticsPerTeam(matches);
 
     res.status(200).json(statistics);
   } catch (error) {
@@ -27,9 +28,18 @@ export const generateLeague = async (req: Request, res: Response, next: NextFunc
 
     const startDateVeryfyAndParsedToDate = leagueDto.validateAndParsedStartDateForCreateLeague(startDate);
 
-    const matchs = await leagueDto.generateLeagueFunction(startDateVeryfyAndParsedToDate);
+    const teamsInDataBase = await teamOdm.getAllTeams();
 
-    res.status(200).json(matchs);
+    const checkedTeams = leagueDto.checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray(teamsInDataBase);
+
+    const matchesInLeague = await leagueDto.generateMatchesPerLeague(checkedTeams, startDateVeryfyAndParsedToDate);
+
+    await matchOdm.deleteAllMatch();
+    await matchOdm.createMatchsFromArray(matchesInLeague);
+
+    matchesInLeague.sort((a, b) => a.round - b.round);
+
+    res.status(200).json(matchesInLeague);
   } catch (error) {
     next(error);
   }

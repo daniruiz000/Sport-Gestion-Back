@@ -9,7 +9,7 @@ export const generateLeagueWithData = async (startDate: Date): Promise<IMatchCre
   const matchesInLeague: IMatchCreate[] = [];
 
   const teamsInDataBase = await teamOdm.getAllTeams();
-  const checkedTeams = leagueDto.checkTeamsNumberIsCorrectAndShuffleIteamArray(teamsInDataBase);
+  const checkedTeams = leagueDto.checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray(teamsInDataBase);
 
   const numTeams = checkedTeams.length;
   const numRounds = (numTeams - 1) * 2;
@@ -24,7 +24,7 @@ export const generateLeagueWithData = async (startDate: Date): Promise<IMatchCre
 
       const actualRound = round;
 
-      const matchLeague = await generateMatchLeagueWithData(checkedTeams, home, away, startDate, actualRound);
+      const matchLeague = await generateMatchWithData(checkedTeams, home, away, startDate, actualRound);
 
       matchesInLeague.push(matchLeague);
     }
@@ -38,7 +38,7 @@ export const generateLeagueWithData = async (startDate: Date): Promise<IMatchCre
 
       const actualRound = round + numerRoundsPerLap;
 
-      const matchLeague = await generateMatchLeagueWithData(checkedTeams, home, away, startDate, actualRound);
+      const matchLeague = await generateMatchWithData(checkedTeams, home, away, startDate, actualRound);
 
       matchesInLeague.push(matchLeague);
     }
@@ -55,7 +55,7 @@ export const generateLeagueWithData = async (startDate: Date): Promise<IMatchCre
   return matchesInLeague;
 };
 
-export const generateMatchLeagueWithData = async (teams: ITeam[], home: number, away: number, startDate: Date, actualRound: number): Promise<IMatchCreate> => {
+export const generateMatchWithData = async (teams: ITeam[], home: number, away: number, startDate: Date, actualRound: number): Promise<IMatchCreate> => {
   const localTeam = teams[home];
   const visitorTeam = teams[away];
 
