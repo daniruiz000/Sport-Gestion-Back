@@ -88,75 +88,73 @@ const showDataLeague = (matches: IMatchCreate[], numCheckedTeams: number, numRou
   `);
 };
 
-const calculateLeagueStatisticsPerTeam = async (matches: IMatchCreate[]): Promise<ITeamsStatistics[]> => {
+const initializeTeam = (teamId: string, teamName: string, teamInitials: string, teamImage: string): ITeamsStatistics => ({
+  id: teamId,
+  name: teamName,
+  initials: teamInitials,
+  image: teamImage,
+  matchesPlayed: 0,
+  matchesWon: 0,
+  matchesLost: 0,
+  matchesDrawn: 0,
+  points: 0,
+  goalsFor: 0,
+  goalsAgainst: 0,
+  position: 0,
+});
+
+const updateTeamsStatisticsPerMatch = (match: IMatchCreate, localTeamStatics: ITeamsStatistics, visitorTeamStatics: ITeamsStatistics): void => {
+  if (match.played && match.goalsLocal && match.goalsVisitor) {
+    const localGoals = match.goalsLocal.length || 0;
+    const visitorGoals = match.goalsVisitor.length || 0;
+
+    if (localGoals > visitorGoals) {
+      leagueDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 3, "win");
+      leagueDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 0, "loss");
+    } else if (localGoals < visitorGoals) {
+      leagueDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 3, "win");
+      leagueDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 0, "loss");
+    } else {
+      leagueDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 1, "draw");
+      leagueDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 1, "draw");
+    }
+  }
+};
+
+const updateTeamStatistics = (teamStatics: ITeamsStatistics, goalsFor: number, goalsAgainst: number, points: number, matchResult: string): void => {
+  teamStatics.goalsFor += goalsFor;
+  teamStatics.goalsAgainst += goalsAgainst;
+  teamStatics.matchesPlayed++;
+
+  switch (matchResult) {
+    case "win":
+      teamStatics.points += points;
+      teamStatics.matchesWon++;
+      break;
+    case "loss":
+      teamStatics.matchesLost++;
+      break;
+    case "draw":
+      teamStatics.points++;
+      teamStatics.matchesDrawn++;
+      break;
+  }
+};
+
+const calculateLeagueStatisticsPerTeam = (matches: IMatchCreate[]): ITeamsStatistics[] => {
   const teams: Record<string, ITeamsStatistics> = {};
 
   for (const match of matches) {
-    const localTeamId = match.localTeam._id as string;
-    const visitorTeamId = match.visitorTeam._id as string;
+    const { _id: localTeamId, name: localTeamName, initials: localTeamInitials, image: localTeamImage } = match.localTeam;
+    const { _id: visitorTeamId, name: visitorTeamName, initials: visitorTeamInitials, image: visitorTeamImage } = match.visitorTeam;
 
-    if (!teams[localTeamId]) {
-      teams[localTeamId] = {
-        id: localTeamId,
-        name: match.localTeam.name,
-        initials: match.localTeam.initials,
-        image: match.localTeam.image,
-        matchesPlayed: 0,
-        matchesWon: 0,
-        matchesLost: 0,
-        matchesDrawn: 0,
-        points: 0,
-        goalsFor: 0,
-        goalsAgainst: 0,
-        position: 0,
-      };
-    }
-
-    if (!teams[visitorTeamId]) {
-      teams[visitorTeamId] = {
-        id: visitorTeamId,
-        name: match.visitorTeam.name,
-        initials: match.visitorTeam.initials,
-        image: match.visitorTeam.image,
-        matchesPlayed: 0,
-        matchesWon: 0,
-        matchesLost: 0,
-        matchesDrawn: 0,
-        points: 0,
-        goalsFor: 0,
-        goalsAgainst: 0,
-        position: 0,
-      };
-    }
+    teams[localTeamId] = teams[localTeamId] || leagueDto.initializeTeam(localTeamId, localTeamName, localTeamInitials, localTeamImage as string);
+    teams[visitorTeamId] = teams[visitorTeamId] || leagueDto.initializeTeam(visitorTeamId, visitorTeamName, visitorTeamInitials, visitorTeamImage as string);
 
     const localTeam = teams[localTeamId];
     const visitorTeam = teams[visitorTeamId];
 
-    if (match.played && match.goalsLocal && match.goalsVisitor) {
-      localTeam.goalsFor += match.goalsLocal.length ? match.goalsLocal.length : 0;
-      localTeam.goalsAgainst += match.goalsVisitor.length ? match.goalsVisitor.length : 0;
-
-      visitorTeam.goalsFor += match.goalsVisitor.length ? match.goalsVisitor.length : 0;
-      visitorTeam.goalsAgainst += match.goalsLocal.length ? match.goalsLocal.length : 0;
-
-      localTeam.matchesPlayed++;
-      visitorTeam.matchesPlayed++;
-
-      if (match.goalsLocal.length > match.goalsVisitor.length) {
-        localTeam.points += 3;
-        localTeam.matchesWon++;
-        visitorTeam.matchesLost++;
-      } else if (match.goalsLocal.length < match.goalsVisitor.length) {
-        visitorTeam.points += 3;
-        visitorTeam.matchesWon++;
-        localTeam.matchesLost++;
-      } else if (match.goalsLocal.length === match.goalsVisitor.length) {
-        localTeam.points++;
-        localTeam.matchesDrawn++;
-        visitorTeam.points++;
-        visitorTeam.matchesDrawn++;
-      }
-    }
+    leagueDto.updateTeamsStatisticsPerMatch(match, localTeam, visitorTeam);
   }
 
   const teamStatistics = Object.values(teams);
@@ -170,16 +168,16 @@ const calculateLeagueStatisticsPerTeam = async (matches: IMatchCreate[]): Promis
   return teamStatistics;
 };
 
-const generateMatchesPerLeague = async (checkedTeams: ITeam[], startDate: Date): Promise<IMatchCreate[]> => {
+const generateMatchesPerLeague = (checkedTeams: ITeam[], startDate: Date): IMatchCreate[] => {
   const matchesInLeague: IMatchCreate[] = [];
 
-  const matchesInFirstLap = await leagueDto.generateMatchesPerLap(checkedTeams, startDate, true);
+  const matchesInFirstLap = leagueDto.generateMatchesPerLap(checkedTeams, startDate, true);
 
   for (const match of matchesInFirstLap) {
     matchesInLeague.push(match);
   }
 
-  const matchesInSecondLap = await leagueDto.generateMatchesPerLap(checkedTeams, startDate, false);
+  const matchesInSecondLap = leagueDto.generateMatchesPerLap(checkedTeams, startDate, false);
 
   for (const match of matchesInSecondLap) {
     matchesInLeague.push(match);
@@ -187,7 +185,7 @@ const generateMatchesPerLeague = async (checkedTeams: ITeam[], startDate: Date):
   return matchesInLeague;
 };
 
-const generateMatchesPerLap = async (checkedTeams: ITeam[], startDate: Date, reverse: boolean): Promise<IMatchCreate[]> => {
+const generateMatchesPerLap = (checkedTeams: ITeam[], startDate: Date, reverse: boolean): IMatchCreate[] => {
   const matchesInLap: IMatchCreate[] = [];
 
   const numCheckedTeams = checkedTeams.length;
@@ -250,6 +248,9 @@ export const leagueDto = {
   convertDateStringToDate,
   checkAreTeamsCorrectToCreateLeague,
   checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray,
+  initializeTeam,
+  updateTeamStatistics,
+  updateTeamsStatisticsPerMatch,
   calculateLeagueStatisticsPerTeam,
   generateRandomGoalForIdplayers,
   generateMatch,
