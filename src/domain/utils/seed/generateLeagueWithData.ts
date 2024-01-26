@@ -96,5 +96,3 @@ const generateRandomGoalForIdplayers = (players: IUser[], minId: number, maxId: 
 
   return goalIds;
 };
-
-const generateRandomUser = () => {};
