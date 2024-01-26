@@ -1,16 +1,18 @@
+import { IUser } from "../../entities/user-entity";
 import { IMatchCreate } from "../../entities/match-entity";
 import { ITeam } from "../../entities/team-entity";
+
 import { userOdm } from "../../odm/user.odm";
 import { teamOdm } from "../../odm/team.odm";
 import { matchOdm } from "../../odm/match.odm";
+
 import { leagueDto } from "../../dto/league.dto";
-import { IUser } from "../../entities/user-entity";
 
 export const generateLeagueWithData = async (startDate: Date): Promise<IMatchCreate[]> => {
   const matchesInLeague: IMatchCreate[] = [];
 
   const teamsInDataBase = await teamOdm.getAllTeams();
-  const checkedTeams = leagueDto.checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray(teamsInDataBase);
+  const checkedTeams = leagueDto.checkAreTeamsNumberCorrectPerCreateLeagueAndShuffleIteamArray(teamsInDataBase);
 
   const numTeams = checkedTeams.length;
   const numRounds = (numTeams - 1) * 2;
@@ -94,3 +96,5 @@ const generateRandomGoalForIdplayers = (players: IUser[], minId: number, maxId: 
 
   return goalIds;
 };
+
+const generateRandomUser = () => {};

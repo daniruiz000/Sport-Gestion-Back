@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
-import { UserAuthInfo, ROL } from "../entities/user-entity";
+import { ROL, UserAuthInfo } from "../entities/user-entity";
+
 import { authDto } from "../dto/auth.dto";
 import { matchOdm } from "../odm/match.odm";
 

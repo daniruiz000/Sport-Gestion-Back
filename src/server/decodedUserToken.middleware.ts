@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from "express";
+
 import { CustomError } from "./checkError.middleware";
+
 import { userOdm } from "../domain/odm/user.odm";
+
 import { verifyToken } from "../utils/token";
 
 export const decodedUserToken = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
