@@ -25,7 +25,7 @@ export const generateLeague = async (req: Request, res: Response, next: NextFunc
 
     authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
 
-    const startDateVeryfyAndParsedToDate = leagueDto.validateAndParsedStartDate(startDate);
+    const startDateVeryfyAndParsedToDate = leagueDto.validateAndParsedStartDateForCreateLeague(startDate);
 
     const matchs = await leagueDto.generateLeagueFunction(startDateVeryfyAndParsedToDate);
 

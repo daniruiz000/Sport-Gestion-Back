@@ -1,9 +1,12 @@
 import { mongoConnect, mongoDisconnect } from "../../repositories/mongo-repository"; // Importamos el archivo de conexión a la BBDD
-import { generateLeagueWithData } from "./generateLeagueWithData";
+
+import { IMatchCreate } from "../../entities/match-entity";
+import { leagueDto } from "../../dto/league.dto";
 import { resetTeams } from "./resetTeams";
 import { resetUsers } from "./resetUsers";
+import { generateLeagueWithData } from "./generateLeagueWithData";
 
-const seedLaLiga = async (): Promise<void> => {
+const seedLaLiga = async (): Promise<IMatchCreate[] | undefined> => {
   try {
     console.log("                                              ");
     console.log("----------------------------------------------");
@@ -13,7 +16,10 @@ const seedLaLiga = async (): Promise<void> => {
     await mongoConnect();
     await resetTeams();
     await resetUsers();
-    await generateLeagueWithData();
+    const startDate = leagueDto.convertDateStringToDate("22/5/22");
+    const matchesInLeagueWithData = await generateLeagueWithData(startDate);
+
+    return matchesInLeagueWithData;
   } catch (error) {
     console.error(error);
   } finally {

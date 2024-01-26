@@ -5,7 +5,56 @@ import { IUser } from "../entities/user-entity";
 import { matchOdm } from "../odm/match.odm";
 import { teamOdm } from "../odm/team.odm";
 
-const validateAndParsedStartDate = (startDateString: string): Date => {
+const generateRandomGoalForIdplayers = (players: IUser[], minId: number, maxId: number): IUser[] => {
+  const goalIds: IUser[] = [];
+  const numGoals = Math.floor(Math.random() * 4);
+
+  for (let i = 0; i < numGoals; i++) {
+    const playerId = Math.floor(Math.random() * (maxId - minId + 1)) + minId;
+    goalIds.push(players[playerId].id);
+  }
+
+  return goalIds;
+};
+
+export const checkAreTeamsCorrectToCreateLeague = (teams: ITeam[]): void => {
+  if (!teams || teams.length === 0) {
+    throw new CustomError("No hay equipos en la BBDD.", 400);
+  }
+
+  if (teams.length % 2 !== 0) {
+    throw new CustomError("La cantidad de equipos debe ser par para aplicar el algoritmo de doble vuelta.", 400);
+  }
+};
+
+const showDataLeague = (matches: IMatchCreate[], numTeams: number, numRounds: number): void => {
+  for (const match of matches) {
+    const formattedDate = match.date.toLocaleDateString();
+    const status = match.played ? "Jugado" : "Pendiente";
+    console.log(`Jornada ${match.round} Partido: ${match.localTeam.name} | ${match.goalsLocal?.length ? match.goalsLocal?.length : 0} - ${match.goalsVisitor?.length ? match.goalsVisitor?.length : 0} | ${match.visitorTeam.name} Fecha ${formattedDate} - ${status}`);
+  }
+
+  console.log(`
+  ------------------------------
+
+  Partidos generados correctamente
+
+  {
+    matchesNum: ${matches.length},
+    numRounds: ${numRounds},
+    matchesPerRound: ${numTeams / 2},
+  }
+
+  ------------------------------
+
+  Liga generada correctamente
+
+  ------------------------------
+  
+  `);
+};
+
+const validateAndParsedStartDateForCreateLeague = (startDateString: string): Date => {
   const actualDate: Date = new Date();
 
   if (!startDateString) {
@@ -21,14 +70,14 @@ const validateAndParsedStartDate = (startDateString: string): Date => {
   return startDate;
 };
 
-export const convertDateStringToDate = (dateString: string): Date => {
+const convertDateStringToDate = (dateString: string): Date => {
   const [day, month, year] = dateString.split("/").map(Number);
   const fullYear = year < 100 ? year + 2000 : year;
 
   return new Date(fullYear, month - 1, day);
 };
 
-export const shuffleIteamArray = (teamList: ITeam[]): ITeam[] => {
+const checkTeamsNumberIsCorrectAndShuffleIteamArray = (teamList: ITeam[]): ITeam[] => {
   const newTeamList = [...teamList];
 
   checkAreTeamsCorrectToCreateLeague(newTeamList);
@@ -41,10 +90,10 @@ export const shuffleIteamArray = (teamList: ITeam[]): ITeam[] => {
   return newTeamList;
 };
 
-export const calculateTeamStatisticsFunction = async (matches: IMatchCreate[]): Promise<ITeamsStatistics[]> => {
+const calculateTeamStatisticsFunction = async (matches: IMatchCreate[]): Promise<ITeamsStatistics[]> => {
   const teams: Record<string, ITeamsStatistics> = {};
 
-  matches.forEach((match) => {
+  for (const match of matches) {
     const localTeamId = match.localTeam._id as string;
     const visitorTeamId = match.visitorTeam._id as string;
 
@@ -110,7 +159,7 @@ export const calculateTeamStatisticsFunction = async (matches: IMatchCreate[]): 
         visitorTeam.matchesDrawn++;
       }
     }
-  });
+  }
 
   const teamStatistics = Object.values(teams);
 
@@ -123,137 +172,81 @@ export const calculateTeamStatisticsFunction = async (matches: IMatchCreate[]): 
   return teamStatistics;
 };
 
-export const generateRandomGoalForIdplayers = (players: IUser[], minId: number, maxId: number): IUser[] => {
-  const goalIds: IUser[] = [];
-  const numGoals = Math.floor(Math.random() * 4);
+const generateLeagueFunction = async (startDate: Date): Promise<IMatchCreate[]> => {
+  const matchesInLeague: IMatchCreate[] = [];
 
-  for (let i = 0; i < numGoals; i++) {
-    const playerId = Math.floor(Math.random() * (maxId - minId + 1)) + minId;
-    goalIds.push(players[playerId].id);
-  }
+  const teamsInDataBase = await teamOdm.getAllTeams();
+  const checkedTeams = leagueDto.checkTeamsNumberIsCorrectAndShuffleIteamArray(teamsInDataBase);
 
-  return goalIds;
-};
+  const numTeams = checkedTeams.length;
+  const numRounds = (numTeams - 1) * 2;
+  const numerRoundsPerLap = numRounds / 2;
+  const numberMatchesPerRound = numTeams / 2;
 
-export const checkAreTeamsCorrectToCreateLeague = (teams: ITeam[]): void => {
-  if (teams.length === 0) {
-    throw new CustomError("No hay equipos en la BBDD.", 400);
-  }
+  // Generar primera vuelta
+  for (let round = 1; round <= numerRoundsPerLap; round++) {
+    for (let i = 0; i < numberMatchesPerRound; i++) {
+      const home = (i + round) % numTeams;
+      const away = (numTeams - 1 - i + round) % numTeams;
 
-  if (teams.length % 2 !== 0) {
-    throw new CustomError("La cantidad de equipos debe ser par para aplicar el algoritmo de doble vuelta.", 400);
-  }
-};
+      const actualRound = round;
 
-export const generateLeagueFunction = async (startDate: Date): Promise<IMatchCreate[] | undefined> => {
-  try {
-    const matches: IMatchCreate[] = [];
+      const matchLeague = leagueDto.generateMatchLeague(checkedTeams, home, away, startDate, actualRound);
 
-    const teamsSended = await teamOdm.getAllTeams();
-
-    const teams = leagueDto.shuffleIteamArray(teamsSended);
-
-    const numTeams = teams.length;
-    const numRounds = (numTeams - 1) * 2;
-    const numMatchesPerRound = numRounds / 2;
-
-    for (let round = 1; round <= numMatchesPerRound; round++) {
-      const roundMatches: IMatchCreate[] = [];
-
-      for (let i = 0; i < numTeams / 2; i++) {
-        const home = (i + round) % numTeams;
-        let away = (numTeams - 1 - i + round) % numTeams;
-
-        if (away === home) {
-          away = (away + 1) % numTeams;
-        }
-
-        const localTeam = teams[home];
-        const visitorTeam = teams[away];
-
-        const matchDate: Date = new Date(startDate.getTime() + round * 7 * 24 * 60 * 60 * 1000);
-        const actualDate = new Date();
-        const played = matchDate < actualDate;
-
-        const match: IMatchCreate = {
-          date: matchDate,
-          localTeam,
-          visitorTeam,
-          played,
-          round,
-        };
-
-        roundMatches.push(match);
-      }
-
-      matches.push(...roundMatches);
+      matchesInLeague.push(matchLeague);
     }
-
-    // Generar segunda vuelta
-    for (let round = 1; round <= numMatchesPerRound; round++) {
-      const roundMatches: IMatchCreate[] = [];
-
-      for (let i = 0; i < numTeams / 2; i++) {
-        const home = (i + round) % numTeams;
-        const away = (numTeams - 1 - i + round) % numTeams;
-
-        const localTeam = teams[away];
-        const visitorTeam = teams[home];
-
-        const matchDate: Date = new Date(startDate.getTime() + (round + numMatchesPerRound) * 7 * 24 * 60 * 60 * 1000);
-        const actualDate = new Date();
-        const played = matchDate < actualDate;
-
-        const match: IMatchCreate = {
-          date: matchDate,
-          localTeam,
-          visitorTeam,
-          played,
-          round: round + numMatchesPerRound,
-        };
-
-        roundMatches.push(match);
-      }
-
-      matches.push(...roundMatches);
-    }
-
-    await matchOdm.deleteAllMatch();
-
-    await matchOdm.createMatchsFromArray(matches);
-
-    const matchSort = matches.sort((a, b) => a.round - b.round);
-
-    leagueDto.showDataLeague(matchSort, matches, numTeams, numRounds);
-
-    return matchSort;
-  } catch (error) {
-    console.error(error);
   }
+
+  // Generar segunda vuelta
+  for (let round = 1; round <= numerRoundsPerLap; round++) {
+    for (let i = 0; i < numberMatchesPerRound; i++) {
+      const home = (numTeams - 1 - i + round) % numTeams;
+      const away = (i + round) % numTeams;
+
+      const actualRound = round + numerRoundsPerLap;
+
+      const matchLeague = leagueDto.generateMatchLeague(checkedTeams, home, away, startDate, actualRound);
+
+      matchesInLeague.push(matchLeague);
+    }
+  }
+
+  await matchOdm.deleteAllMatch();
+  await matchOdm.createMatchsFromArray(matchesInLeague);
+
+  matchesInLeague.sort((a, b) => a.round - b.round);
+
+  leagueDto.showDataLeague(matchesInLeague, numTeams, numRounds);
+
+  return matchesInLeague;
 };
 
-const showDataLeague = (matchSort: IMatchCreate[], matches: IMatchCreate[], numTeams: number, numRounds: number): void => {
-  for (let i = 0; i < matchSort.length; i++) {
-    const match = matches[i];
-    const formattedDate = match.date.toLocaleDateString();
-    const status = match.played ? "Jugado" : "Pendiente";
-    console.log(`Jornada ${match.round} Partido: ${match.localTeam.name} / ${match.visitorTeam.name} Fecha ${formattedDate} - ${status}`);
-  }
-  console.log("Partidos generados correctamente");
-  console.log({
-    matchesNum: matches.length,
-    numRounds,
-    matchesPerRound: numTeams / 2,
-  });
-  console.log("Liga generada correctamente");
+const generateMatchLeague = (teams: ITeam[], home: number, away: number, startDate: Date, actualRound: number): IMatchCreate => {
+  const localTeam = teams[home];
+  const visitorTeam = teams[away];
+
+  const matchDate = new Date(startDate.getTime() + actualRound * 7 * 24 * 60 * 60 * 1000);
+  const actualDate = new Date();
+  const played = matchDate < actualDate;
+
+  const match: IMatchCreate = {
+    date: matchDate,
+    localTeam,
+    visitorTeam,
+    played,
+    round: actualRound,
+  };
+
+  return match;
 };
 
 export const leagueDto = {
   showDataLeague,
-  validateAndParsedStartDate,
+  validateAndParsedStartDateForCreateLeague,
   convertDateStringToDate,
-  shuffleIteamArray,
+  checkTeamsNumberIsCorrectAndShuffleIteamArray,
   calculateTeamStatisticsFunction,
   generateRandomGoalForIdplayers,
   generateLeagueFunction,
+  generateMatchLeague,
 };
