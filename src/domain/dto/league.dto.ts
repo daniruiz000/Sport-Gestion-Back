@@ -221,6 +221,21 @@ const generateLeagueFunction = async (startDate: Date): Promise<IMatchCreate[]> 
   return matchesInLeague;
 };
 
+const generateMatchesForRound = (checkedTeams: ITeam[], numTeams: number, startDate: Date, actualRound: number, reverse: boolean): IMatchCreate[] => {
+  const matches = [];
+  const numberMatchesPerRound = numTeams / 2;
+
+  for (let i = 0; i < numberMatchesPerRound; i++) {
+    const home = reverse ? (numTeams - 1 - i + actualRound) % numTeams : (i + actualRound) % numTeams;
+    const away = reverse ? (i + actualRound) % numTeams : (numTeams - 1 - i + actualRound) % numTeams;
+
+    const matchLeague = leagueDto.generateMatchLeague(checkedTeams, home, away, startDate, actualRound);
+    matches.push(matchLeague);
+  }
+
+  return matches;
+};
+
 const generateMatchLeague = (teams: ITeam[], home: number, away: number, startDate: Date, actualRound: number): IMatchCreate => {
   const localTeam = teams[home];
   const visitorTeam = teams[away];
@@ -249,4 +264,5 @@ export const leagueDto = {
   generateRandomGoalForIdplayers,
   generateLeagueFunction,
   generateMatchLeague,
+  generateMatchesForRound,
 };
