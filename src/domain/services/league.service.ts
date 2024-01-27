@@ -14,11 +14,7 @@ export const calculateLeagueStatistics = async (req: Request, res: Response, nex
     // NO LOGIN
     const matches = await matchOdm.getAllMatches();
 
-<<<<<<< HEAD
     const statistics = teamStatisticsDto.calculateTeamsStatisticsLeague(matches);
-=======
-    const statistics = await leagueDto.calculateLeagueStatisticsPerTeam(matches);
->>>>>>> parent of 0e05b6f (f)
 
     res.status(200).json(statistics);
   } catch (error) {
