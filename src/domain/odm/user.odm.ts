@@ -60,6 +60,15 @@ const getUserByEmailWithPassword = async (emailPassed: string): Promise<IUser> =
   return user;
 };
 
+const getAllReferees = async (): Promise<IUser[]> => {
+  const refereeList = await User.find({ rol: ROL.REFEREE });
+  if (!refereeList || refereeList.length <= 0) {
+    throw new CustomError("Problema al buscar arbitros para ese equipo.", 400);
+  }
+
+  return refereeList;
+};
+
 const getPlayersByIdTeam = async (teamId: string): Promise<IUser[]> => {
   const players = await User.find({ team: teamId, rol: ROL.PLAYER });
   if (!players) {
@@ -135,6 +144,7 @@ export const userOdm = {
   getUserCount,
   getUserById,
   getUserByIdWithPassword,
+  getAllReferees,
   getPlayersByIdTeam,
   getPlayersWithoutTeam,
   getManagerByIdTeam,

@@ -17,7 +17,7 @@ export interface IMatchCreate {
   goalsVisitor?: IUser[];
   played: boolean;
   round: number;
-  referee?: IUser;
+  referee: IUser;
 }
 
 export interface IMatch extends IMatchCreate, Document {}
@@ -65,7 +65,7 @@ const matchSchema = new Schema<IMatch>(
       min: [1, "Minimo primera jornada"],
     },
 
-    referee: { type: Schema.Types.ObjectId, ref: User },
+    referee: { type: Schema.Types.ObjectId, ref: User, required: true },
   },
   { timestamps: true }
 );

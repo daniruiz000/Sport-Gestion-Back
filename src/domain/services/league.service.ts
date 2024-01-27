@@ -35,7 +35,7 @@ export const generateLeague = async (req: Request, res: Response, next: NextFunc
 
     const checkedTeams = leagueDto.checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray(teamsInDataBase);
 
-    const matchesInLeague = leagueDto.generateMatchesPerLeague(checkedTeams, startDateVeryfyAndParsedToDate);
+    const matchesInLeague = await leagueDto.generateMatchesPerLeague(checkedTeams, startDateVeryfyAndParsedToDate);
 
     await matchOdm.deleteAllMatch();
     await matchOdm.createMatchsFromArray(matchesInLeague);

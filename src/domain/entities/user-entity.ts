@@ -53,7 +53,7 @@ const userSchema = new Schema<IUser>(
     firstName: {
       type: String,
       trim: true,
-      minLength: [3, "Al menos tres letras para el nombre"],
+      minLength: [2, "Al menos tres letras para el nombre"],
       maxLength: [22, "Nombre demasiado largo, máximo de 22 caracteres"],
       required: true,
     },
@@ -85,7 +85,6 @@ const userSchema = new Schema<IUser>(
       type: String,
       enum: ROL,
       default: ROL.PLAYER,
-      required: true,
     },
     team: {
       type: Schema.Types.ObjectId,

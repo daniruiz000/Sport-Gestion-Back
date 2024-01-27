@@ -4,7 +4,7 @@ import { CustomError } from "../../server/checkError.middleware";
 import { IUser } from "../entities/user-entity";
 
 const getAllMatches = async (): Promise<IMatch[]> => {
-  const allMatches = await Match.find().populate(["localTeam", "visitorTeam"]);
+  const allMatches = await Match.find().populate(["localTeam", "visitorTeam", "referee"]);
 
   if (!allMatches) {
     throw new CustomError("Partidos no encontrados", 400);
@@ -14,7 +14,7 @@ const getAllMatches = async (): Promise<IMatch[]> => {
 };
 
 const getMatchById = async (id: string): Promise<IMatch> => {
-  const matchById = await Match.findById(id).populate(["localTeam", "visitorTeam"]);
+  const matchById = await Match.findById(id).populate(["localTeam", "visitorTeam", "referee"]);
 
   if (!matchById) {
     throw new CustomError("Partido no encontrado.", 400);
@@ -88,13 +88,7 @@ const deleteMatch = async (id: string): Promise<ModifyResult<IMatch>> => {
 };
 
 const deleteAllMatch = async (): Promise<boolean> => {
-  const isDeletedMatches = await Match.collection.drop();
-
-  if (!isDeletedMatches) {
-    throw new CustomError("Problema al borrar todos los partidos.", 204);
-  }
-
-  return isDeletedMatches;
+  return await Match.collection.drop();
 };
 
 const updateMatch = async (id: string, matchData: IMatchCreate): Promise<IMatch> => {

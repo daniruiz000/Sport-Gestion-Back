@@ -12,6 +12,7 @@ export const resetUsers = async (): Promise<void> => {
     console.log("Usuarios borrados");
 
     const admin = adminUser;
+    const referees = createRandomUserArray(ROL.REFEREE, 5);
     const managers = createRandomUserArray(ROL.MANAGER, 10);
     const players = createRandomUserArray(ROL.PLAYER, 60);
 
@@ -19,6 +20,11 @@ export const resetUsers = async (): Promise<void> => {
 
     const playersPerTeam = playersWithTeam / teams.length;
     const playersNoTeam = players.length - 50;
+
+    for (const referee of referees) {
+      await userOdm.createUser(referee);
+    }
+    console.log("Arbitros creados correctamente");
 
     for (let i = 0; i < playersWithTeam; i++) {
       const player: IUserCreate = players[i];
@@ -52,6 +58,7 @@ export const resetUsers = async (): Promise<void> => {
       playersNoTeam,
       managers: managers.length,
       admins: 1,
+      referees: referees.length,
       playersPerTeam,
     });
   } catch (error) {
