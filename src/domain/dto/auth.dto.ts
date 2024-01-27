@@ -22,6 +22,7 @@ const isUserRolAuthToAction = (userAuthInfo: UserAuthInfo, authRoles: ROL[]): vo
       isUserRolAuth = true;
     }
   }
+
   if (!isUserRolAuth) {
     throw new CustomError("No estás autorizado para realizar la operación.", 401);
   }
