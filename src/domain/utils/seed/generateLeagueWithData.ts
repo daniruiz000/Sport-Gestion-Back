@@ -7,10 +7,6 @@ import { teamOdm } from "../../odm/team.odm";
 import { matchOdm } from "../../odm/match.odm";
 
 import { leagueDto } from "../../dto/league.dto";
-<<<<<<< HEAD
-import { generateRandomGoalForIdplayers } from "./generateRandomData";
-=======
->>>>>>> 496310d (fixed code)
 
 export const generateLeagueWithData = async (startDate: Date): Promise<IMatchCreate[]> => {
   const matchesInLeague: IMatchCreate[] = [];
@@ -88,8 +84,6 @@ export const generateMatchWithData = async (teams: ITeam[], home: number, away: 
 
   return match;
 };
-<<<<<<< HEAD
-=======
 
 const generateRandomGoalForIdplayers = (players: IUser[], minId: number, maxId: number): IUser[] => {
   const goalIds: IUser[] = [];
@@ -102,6 +96,3 @@ const generateRandomGoalForIdplayers = (players: IUser[], minId: number, maxId: 
 
   return goalIds;
 };
-
-const generateRandomUser = () => {};
->>>>>>> 496310d (fixed code)
