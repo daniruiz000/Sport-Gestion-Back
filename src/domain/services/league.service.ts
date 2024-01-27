@@ -29,7 +29,7 @@ export const generateLeague = async (req: Request, res: Response, next: NextFunc
 
     authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
 
-    const startDateVeryfyAndParsedToDate = leagueDto.validateAndParsedStartDateForCreateLeague(startDate);
+    const startDateVeryfyAndParsedToDate = leagueDto.checkAndParsedStartDateForCreateLeague(startDate);
 
     const teamsInDataBase = await teamOdm.getAllTeams();
 
