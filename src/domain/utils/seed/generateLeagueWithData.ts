@@ -1,3 +1,4 @@
+import { IUser } from "../../entities/user-entity";
 import { IMatchCreate } from "../../entities/match-entity";
 import { ITeam } from "../../entities/team-entity";
 
@@ -6,7 +7,10 @@ import { teamOdm } from "../../odm/team.odm";
 import { matchOdm } from "../../odm/match.odm";
 
 import { leagueDto } from "../../dto/league.dto";
+<<<<<<< HEAD
 import { generateRandomGoalForIdplayers } from "./generateRandomData";
+=======
+>>>>>>> 496310d (fixed code)
 
 export const generateLeagueWithData = async (startDate: Date): Promise<IMatchCreate[]> => {
   const matchesInLeague: IMatchCreate[] = [];
@@ -84,3 +88,20 @@ export const generateMatchWithData = async (teams: ITeam[], home: number, away: 
 
   return match;
 };
+<<<<<<< HEAD
+=======
+
+const generateRandomGoalForIdplayers = (players: IUser[], minId: number, maxId: number): IUser[] => {
+  const goalIds: IUser[] = [];
+  const numGoals = Math.floor(Math.random() * 4);
+
+  for (let i = 0; i < numGoals; i++) {
+    const playerId = Math.floor(Math.random() * (maxId - minId + 1)) + minId;
+    goalIds.push(players[playerId].id);
+  }
+
+  return goalIds;
+};
+
+const generateRandomUser = () => {};
+>>>>>>> 496310d (fixed code)
