@@ -1,6 +1,7 @@
 import { CustomError } from "../../server/checkError.middleware";
 
 import { ROL, UserAuthInfo } from "../entities/user-entity";
+import { matchOdm } from "../odm/match.odm";
 
 import { userOdm } from "../odm/user.odm";
 
@@ -12,6 +13,18 @@ const iAmManagerAndPlayerIdIsOnMyTeam = async (userRol: ROL, userTeam: string, u
   const userToCheck = await userOdm.getUserById(userToCheckId);
 
   return userToCheck.team === userTeam && userRol === ROL.MANAGER;
+};
+
+const isReferreInThisMatchOrAdmin = async (userAuthInfo: UserAuthInfo, idMatch: string): Promise<boolean> => {
+  let isUserAuth = false;
+
+  const refereeInMatch = await matchOdm.getReferreInMatch(idMatch);
+
+  if (userAuthInfo.id === refereeInMatch.id || userAuthInfo.id === ROL.ADMIN) {
+    isUserAuth = true;
+  }
+
+  return isUserAuth;
 };
 
 const isUserRolAuthToAction = (userAuthInfo: UserAuthInfo, authRoles: ROL[]): void => {
@@ -28,7 +41,7 @@ const isUserRolAuthToAction = (userAuthInfo: UserAuthInfo, authRoles: ROL[]): vo
   }
 };
 
-const isUserAuthToSpecialAction = async (userAuthInfo: UserAuthInfo, userToDeletedId: string): Promise<void> => {
+const itsMySelfOrAmManagerAndPlayerIdIsOnMyTeamOrAmAdmin = async (userAuthInfo: UserAuthInfo, userToDeletedId: string): Promise<void> => {
   const userId = userAuthInfo.id;
   const userRol = userAuthInfo.rol;
   const userTeam = userAuthInfo.team;
@@ -47,6 +60,7 @@ const isUserAuthToSpecialAction = async (userAuthInfo: UserAuthInfo, userToDelet
 export const authDto = {
   isUserRolAuthToAction,
   itsMySelf,
+  isReferreInThisMatchOrAdmin,
   iAmManagerAndPlayerIdIsOnMyTeam,
-  isUserAuthToSpecialAction,
+  itsMySelfOrAmManagerAndPlayerIdIsOnMyTeamOrAmAdmin,
 };

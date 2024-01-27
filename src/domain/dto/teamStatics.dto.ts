@@ -1,4 +1,5 @@
-import { IMatchCreate } from "../entities/match-entity";
+import { IMatchCreate, MatchResult } from "../entities/match-entity";
+
 import { ITeamsStatistics } from "../entities/teamStatics-entity";
 
 const initializeTeamStatic = (teamId: string, teamName: string, teamInitials: string, teamImage: string): ITeamsStatistics => ({
@@ -16,20 +17,20 @@ const initializeTeamStatic = (teamId: string, teamName: string, teamInitials: st
   position: 0,
 });
 
-const updateTeamStatistics = (teamStatics: ITeamsStatistics, goalsFor: number, goalsAgainst: number, points: number, matchResult: string): void => {
+const updateTeamStatistics = (teamStatics: ITeamsStatistics, goalsFor: number, goalsAgainst: number, points: number, matchResult: MatchResult): void => {
   teamStatics.goalsFor += goalsFor;
   teamStatics.goalsAgainst += goalsAgainst;
   teamStatics.matchesPlayed++;
 
   switch (matchResult) {
-    case "win":
+    case MatchResult.WIN:
       teamStatics.points += points;
       teamStatics.matchesWon++;
       break;
-    case "loss":
+    case MatchResult.LOSS:
       teamStatics.matchesLost++;
       break;
-    case "draw":
+    case MatchResult.DRAW:
       teamStatics.points++;
       teamStatics.matchesDrawn++;
       break;
@@ -42,14 +43,18 @@ const updateTeamsStatisticsPerMatch = (match: IMatchCreate, localTeamStatics: IT
     const visitorGoals = match.goalsVisitor.length || 0;
 
     if (localGoals > visitorGoals) {
-      teamStatisticsDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 3, "win");
-      teamStatisticsDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 0, "loss");
-    } else if (localGoals < visitorGoals) {
-      teamStatisticsDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 3, "win");
-      teamStatisticsDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 0, "loss");
-    } else {
-      teamStatisticsDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 1, "draw");
-      teamStatisticsDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 1, "draw");
+      teamStatisticsDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 3, MatchResult.WIN);
+      teamStatisticsDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 0, MatchResult.LOSS);
+    }
+
+    if (localGoals < visitorGoals) {
+      teamStatisticsDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 3, MatchResult.WIN);
+      teamStatisticsDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 0, MatchResult.LOSS);
+    }
+
+    if (localGoals === visitorGoals) {
+      teamStatisticsDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 1, MatchResult.DRAW);
+      teamStatisticsDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 1, MatchResult.DRAW);
     }
   }
 };

@@ -13,6 +13,7 @@ export enum ROL {
   PLAYER = "PLAYER",
   MANAGER = "MANAGER",
   ADMIN = "ADMIN",
+  REFEREE = "REFEREE",
 }
 
 export interface MyUser {

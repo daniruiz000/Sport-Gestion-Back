@@ -1,6 +1,7 @@
 import { ModifyResult } from "mongoose";
 import { Match, IMatch, IMatchCreate } from "../entities/match-entity";
 import { CustomError } from "../../server/checkError.middleware";
+import { IUser } from "../entities/user-entity";
 
 const getAllMatches = async (): Promise<IMatch[]> => {
   const allMatches = await Match.find().populate(["localTeam", "visitorTeam"]);
@@ -20,6 +21,22 @@ const getMatchById = async (id: string): Promise<IMatch> => {
   }
 
   return matchById;
+};
+
+const getReferreInMatch = async (id: string): Promise<IUser> => {
+  const matchById = await Match.findById(id).populate(["referee"]);
+
+  if (!matchById) {
+    throw new CustomError("Partido no encontrado.", 400);
+  }
+
+  const referreInMatch = matchById.referee;
+
+  if (!referreInMatch) {
+    throw new CustomError("Arbitro no encontrado en ese partido.", 400);
+  }
+
+  return referreInMatch;
 };
 
 const getMatchesByRound = async (round: string): Promise<IMatch[]> => {
@@ -93,6 +110,7 @@ const updateMatch = async (id: string, matchData: IMatchCreate): Promise<IMatch>
 export const matchOdm = {
   getAllMatches,
   getMatchById,
+  getReferreInMatch,
   getMatchesByRound,
   getMatchesByTeamId,
   createMatch,

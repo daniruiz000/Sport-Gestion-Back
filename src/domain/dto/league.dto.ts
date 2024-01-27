@@ -1,14 +1,8 @@
 import { CustomError } from "../../server/checkError.middleware";
+import { convertDateStringToDate } from "../../utils/convertDateStringToDate";
 import { IMatchCreate } from "../entities/match-entity";
 
 import { ITeam } from "../entities/team-entity";
-
-const convertDateStringToDate = (dateString: string): Date => {
-  const [day, month, year] = dateString.split("/").map(Number);
-  const fullYear = year < 100 ? year + 2000 : year;
-
-  return new Date(fullYear, month - 1, day);
-};
 
 const checkAndParsedStartDateForCreateLeague = (startDateString: string): Date => {
   const actualDate: Date = new Date();
@@ -17,7 +11,7 @@ const checkAndParsedStartDateForCreateLeague = (startDateString: string): Date =
     throw new CustomError("Tiene que introducir una fecha de inicio con formato:'21/5/4' para realizar esta operación", 404);
   }
 
-  const startDate = leagueDto.convertDateStringToDate(startDateString);
+  const startDate = convertDateStringToDate(startDateString);
 
   if (actualDate > startDate) {
     throw new CustomError("La fecha tiene que ser posterior a la actual", 404);
@@ -152,7 +146,6 @@ const generateMatch = (teams: ITeam[], home: number, away: number, startDate: Da
 
 export const leagueDto = {
   showDataLeague,
-  convertDateStringToDate,
   checkAreTeamsCorrectToCreateLeague,
   checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray,
   checkAndParsedStartDateForCreateLeague,

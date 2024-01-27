@@ -89,7 +89,7 @@ export const deleteUser = async (req: Request, res: Response, next: NextFunction
     const userToDeletedId = req.params.id;
     const userAuthInfo = req.user as UserAuthInfo;
 
-    await authDto.isUserAuthToSpecialAction(userAuthInfo, userToDeletedId);
+    await authDto.itsMySelfOrAmManagerAndPlayerIdIsOnMyTeamOrAmAdmin(userAuthInfo, userToDeletedId);
 
     const userDeleted = await userOdm.deleteUser(userToDeletedId);
 
@@ -106,7 +106,7 @@ export const updateUser = async (req: Request, res: Response, next: NextFunction
     const userToUpdateId = req.params.id;
     const userAuthInfo = req.user as UserAuthInfo;
 
-    await authDto.isUserAuthToSpecialAction(userAuthInfo, userToUpdateId);
+    await authDto.itsMySelfOrAmManagerAndPlayerIdIsOnMyTeamOrAmAdmin(userAuthInfo, userToUpdateId);
 
     const userSaved = await userDto.updateUser(userAuthInfo, newDataToUser, userToUpdateId);
 

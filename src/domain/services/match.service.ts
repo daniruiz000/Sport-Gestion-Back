@@ -73,15 +73,16 @@ export const deleteMatch = async (req: Request, res: Response, next: NextFunctio
 
 export const updateMatch = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // ADMIN
-    const id = req.params.id;
+    // ADMIN / REFEREE
+    const matchIdToUpdate = req.params.id;
     const userAuthInfo = req.user as UserAuthInfo;
+    const matchDataInsert = req.body;
 
-    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
+    const matchToUpdate = await matchOdm.getMatchById(matchIdToUpdate);
 
-    const matchToUpdate = await matchOdm.getMatchById(id);
+    await authDto.isReferreInThisMatchOrAdmin(userAuthInfo, matchIdToUpdate);
 
-    Object.assign(matchToUpdate, req.body);
+    Object.assign(matchToUpdate, matchDataInsert);
 
     const matchToSend = await matchToUpdate.save();
 
