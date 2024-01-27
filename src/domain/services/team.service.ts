@@ -94,7 +94,7 @@ export const createTeam = async (req: Request, res: Response, next: NextFunction
 
 export const deleteTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // ADMIN / MANAGER a su propio equipo
+    // ADMIN
 
     const id = req.params.id;
 
@@ -112,7 +112,7 @@ export const deleteTeam = async (req: Request, res: Response, next: NextFunction
 
 export const updateTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // ADMIN / MANAGER a su propio equipo
+    // ADMIN
 
     const id = req.params.id;
 
