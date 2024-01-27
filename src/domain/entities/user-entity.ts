@@ -3,6 +3,7 @@ import validator from "validator";
 
 import { Team } from "./team-entity";
 import { IMatch } from "./match-entity";
+
 import { encryptData } from "../../utils/crypt";
 import { CustomError } from "../../server/checkError.middleware";
 
@@ -12,12 +13,6 @@ export enum ROL {
   PLAYER = "PLAYER",
   MANAGER = "MANAGER",
   ADMIN = "ADMIN",
-}
-
-export interface UserAuthInfo {
-  id: string;
-  team: string;
-  rol: ROL;
 }
 
 export interface MyUser {
@@ -30,8 +25,14 @@ export interface MyUser {
 export interface AllUsersPaginated {
   totalItems: number;
   totalPages: number;
-  currentPage: any;
+  currentPage: number;
   users: IUser[];
+}
+
+export interface UserAuthInfo {
+  id: string;
+  team: string;
+  rol: ROL;
 }
 
 export interface IUserCreate {
@@ -39,7 +40,7 @@ export interface IUserCreate {
   lastName: string;
   email: string;
   password: string;
-  rol: ROL;
+  rol?: ROL;
   team?: string;
   image?: string;
 }

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
 import { ROL, UserAuthInfo } from "../entities/user-entity";
+
 import { userOdm } from "../odm/user.odm";
 import { authDto } from "../dto/auth.dto";
 import { userDto } from "../dto/user.dto";
@@ -125,7 +126,7 @@ export const login = async (req: Request, res: Response, next: NextFunction): Pr
 
     await compareEncryptedDataWithData(passwordToCheck, user.password);
 
-    const jwtToken = generateToken(user.id, user.email, user.rol);
+    const jwtToken = generateToken(user.id, user.email, user.rol as ROL);
 
     res.status(200).json({ token: jwtToken });
   } catch (error) {
