@@ -1,4 +1,5 @@
 import { type Request, type Response, type NextFunction } from "express";
+
 import { CustomError } from "./checkError.middleware";
 
 export const checkPaginatedParams = async (req: Request, res: Response, next: NextFunction): Promise<void> => {

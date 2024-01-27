@@ -1,8 +1,7 @@
 import { CustomError } from "../../server/checkError.middleware";
 
 import { IMatchCreate } from "../entities/match-entity";
-import { ITeam, ITeamsStatistics } from "../entities/team-entity";
-import { teamStatisticsDto } from "./teamStatics.dto";
+import { ITeam } from "../entities/team-entity";
 
 import { convertDateStringToDate } from "../../utils/convertDateStringToDate";
 
@@ -16,7 +15,7 @@ const checkAreTeamsCorrectToCreateLeague = (teams: ITeam[]): void => {
   }
 };
 
-const validateAndParsedStartDateForCreateLeague = (startDateString: string): Date => {
+const checkParsedStartDateForCreateLeague = (startDateString: string): Date => {
   const actualDate: Date = new Date();
 
   if (!startDateString) {
@@ -32,7 +31,7 @@ const validateAndParsedStartDateForCreateLeague = (startDateString: string): Dat
   return startDate;
 };
 
-const checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray = (teamList: ITeam[]): ITeam[] => {
+const checkAreTeamsNumberCorrectPerCreateLeagueAndShuffleIteamArray = (teamList: ITeam[]): ITeam[] => {
   const newTeamList = [...teamList];
 
   checkAreTeamsCorrectToCreateLeague(newTeamList);
@@ -70,33 +69,6 @@ const showDataLeague = (matches: IMatchCreate[], numCheckedTeams: number, numRou
   ------------------------------
   
   `);
-};
-
-const calculateTeamsStatisticsLeague = (matches: IMatchCreate[]): ITeamsStatistics[] => {
-  const teams: Record<string, ITeamsStatistics> = {};
-
-  for (const match of matches) {
-    const { _id: localTeamId, name: localTeamName, initials: localTeamInitials, image: localTeamImage } = match.localTeam;
-    const { _id: visitorTeamId, name: visitorTeamName, initials: visitorTeamInitials, image: visitorTeamImage } = match.visitorTeam;
-
-    teams[localTeamId] = teams[localTeamId] || teamStatisticsDto.initializeTeamStatic(localTeamId, localTeamName, localTeamInitials, localTeamImage as string);
-    teams[visitorTeamId] = teams[visitorTeamId] || teamStatisticsDto.initializeTeamStatic(visitorTeamId, visitorTeamName, visitorTeamInitials, visitorTeamImage as string);
-
-    const localTeam = teams[localTeamId];
-    const visitorTeam = teams[visitorTeamId];
-
-    teamStatisticsDto.updateTeamsStatisticsPerMatch(match, localTeam, visitorTeam);
-  }
-
-  const teamStatistics = Object.values(teams);
-
-  teamStatistics.sort((a, b) => b.points - a.points);
-
-  teamStatistics.forEach((team, index) => {
-    team.position = index + 1;
-  });
-
-  return teamStatistics;
 };
 
 const generateMatchesPerLeague = (checkedTeams: ITeam[], startDate: Date): IMatchCreate[] => {
@@ -175,10 +147,9 @@ const generateMatch = (teams: ITeam[], home: number, away: number, startDate: Da
 
 export const leagueDto = {
   showDataLeague,
-  validateAndParsedStartDateForCreateLeague,
+  checkParsedStartDateForCreateLeague,
   checkAreTeamsCorrectToCreateLeague,
-  checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray,
-  calculateTeamsStatisticsLeague,
+  checkAreTeamsNumberCorrectPerCreateLeagueAndShuffleIteamArray,
   generateMatch,
   generateMatchesPerRound,
   generateMatchesPerLap,

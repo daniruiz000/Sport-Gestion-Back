@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+
 import { CustomError } from "../server/checkError.middleware";
+
 import { ROL } from "../domain/entities/user-entity";
 
 dotenv.config();
