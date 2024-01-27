@@ -1,4 +1,3 @@
-import { userList } from "../../../data";
 import { ROL, IUserCreate } from "../../entities/user-entity";
 
 import { teamOdm } from "../../odm/team.odm";
@@ -47,7 +46,7 @@ export const resetUsers = async (): Promise<void> => {
 
     console.log("Usuarios y relaciones con equipos creados correctamente");
     console.log({
-      users: userList.length,
+      users: players.length + managers.length + admins.length,
       players: players.length,
       playersWithTeam,
       playersNoTeam,
