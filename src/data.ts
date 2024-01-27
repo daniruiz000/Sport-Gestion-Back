@@ -1,3 +1,5 @@
+import { ROL } from "./domain/entities/user-entity";
+
 export const teamList = [
   { name: "Real Madrid CF", initials: "RMC", image: "https://assets.laliga.com/assets/2019/06/07/small/real-madrid.png" },
   { name: "Barcelona FC", initials: "FBC", image: "https://assets.laliga.com/assets/2019/06/07/small/barcelona.png" },
@@ -10,3 +12,11 @@ export const teamList = [
   { name: "Girona FC", initials: "GFC", image: "https://assets.laliga.com/assets/2019/06/07/small/girona.png" },
   { name: "Getafe FC", initials: "GEC", image: "https://assets.laliga.com/assets/2019/06/07/small/getafe.png" },
 ];
+
+export const adminUser = {
+  firstName: "Dani",
+  lastName: "Ruiz",
+  email: "admin@gmail.com",
+  password: "55555555",
+  rol: ROL.ADMIN,
+};
