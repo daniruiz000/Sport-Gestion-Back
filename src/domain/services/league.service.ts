@@ -1,12 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
-import { ROL, UserAuthInfo } from "../entities/user-entity";
-
 import { matchOdm } from "../odm/match.odm";
-import { teamOdm } from "../odm/team.odm";
 
-import { authDto } from "../dto/auth.dto";
-import { leagueDto } from "../dto/league.dto";
 import { teamStatisticsDto } from "../dto/teamStatics.dto";
 
 export const calculateLeagueStatistics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -22,34 +17,6 @@ export const calculateLeagueStatistics = async (req: Request, res: Response, nex
   }
 };
 
-export const generateLeague = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-  try {
-    // ADMIN
-    const userAuthInfo = req.user as UserAuthInfo;
-    const startDate = req.body.startDate;
-
-    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
-
-    const startDateVeryfyAndParsedToDate = leagueDto.checkParsedStartDateForCreateLeague(startDate);
-
-    const teamsInDataBase = await teamOdm.getAllTeams();
-
-    const checkedTeams = leagueDto.checkAreTeamsNumberCorrectPerCreateLeagueAndShuffleIteamArray(teamsInDataBase);
-
-    const matchesInLeague = leagueDto.generateMatchesPerLeague(checkedTeams, startDateVeryfyAndParsedToDate);
-
-    await matchOdm.deleteAllMatch();
-    await matchOdm.createMatchsFromArray(matchesInLeague);
-
-    matchesInLeague.sort((a, b) => a.round - b.round);
-
-    res.status(200).json(matchesInLeague);
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const leagueService = {
-  generateLeague,
   calculateLeagueStatistics,
 };

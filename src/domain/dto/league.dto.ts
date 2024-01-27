@@ -1,11 +1,9 @@
-import { CustomError } from "../../server/checkError.middleware";
 import { IMatchCreate } from "../entities/match-entity";
-<<<<<<< HEAD
+
 import { ITeam } from "../entities/team-entity";
-=======
-import { ITeam, ITeamsStatistics } from "../entities/team-entity";
+import { ITeamsStatistics } from "../entities/teamStatics-entity";
+
 import { IUser } from "../entities/user-entity";
->>>>>>> parent of 0e05b6f (f)
 
 const generateRandomGoalForIdplayers = (players: IUser[], minId: number, maxId: number): IUser[] => {
   const goalIds: IUser[] = [];
@@ -24,49 +22,6 @@ const convertDateStringToDate = (dateString: string): Date => {
   const fullYear = year < 100 ? year + 2000 : year;
 
   return new Date(fullYear, month - 1, day);
-};
-
-const checkParsedStartDateForCreateLeague = (startDateString: string): Date => {
-  const actualDate: Date = new Date();
-
-  if (!startDateString) {
-    throw new CustomError("Tiene que introducir una fecha de inicio con formato:'21/5/4' para realizar esta operación", 404);
-  }
-
-  const startDate = leagueDto.convertDateStringToDate(startDateString);
-
-  if (actualDate > startDate) {
-    throw new CustomError("La fecha tiene que ser posterior a la actual", 404);
-  }
-
-  return startDate;
-};
-
-<<<<<<< HEAD
-const checkAreTeamsNumberCorrectPerCreateLeagueAndShuffleIteamArray = (teamList: ITeam[]): ITeam[] => {
-=======
-const checkAreTeamsCorrectToCreateLeague = (teams: ITeam[]): void => {
-  if (!teams || teams.length === 0) {
-    throw new CustomError("No hay equipos en la BBDD.", 400);
-  }
-
-  if (teams.length % 2 !== 0) {
-    throw new CustomError("La cantidad de equipos debe ser par para aplicar el algoritmo de doble vuelta.", 400);
-  }
-};
-
-const checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray = (teamList: ITeam[]): ITeam[] => {
->>>>>>> parent of 0e05b6f (f)
-  const newTeamList = [...teamList];
-
-  checkAreTeamsCorrectToCreateLeague(newTeamList);
-
-  for (let i = newTeamList.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newTeamList[i], newTeamList[j]] = [newTeamList[j], newTeamList[i]];
-  }
-
-  return newTeamList;
 };
 
 const showDataLeague = (matches: IMatchCreate[], numCheckedTeams: number, numRounds: number): void => {
@@ -96,8 +51,6 @@ const showDataLeague = (matches: IMatchCreate[], numCheckedTeams: number, numRou
   `);
 };
 
-<<<<<<< HEAD
-=======
 const initializeTeam = (teamId: string, teamName: string, teamInitials: string, teamImage: string): ITeamsStatistics => ({
   id: teamId,
   name: teamName,
@@ -119,14 +72,14 @@ const updateTeamsStatisticsPerMatch = (match: IMatchCreate, localTeamStatics: IT
     const visitorGoals = match.goalsVisitor.length || 0;
 
     if (localGoals > visitorGoals) {
-      leagueDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 3, "win");
-      leagueDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 0, "loss");
+      updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 3, "win");
+      updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 0, "loss");
     } else if (localGoals < visitorGoals) {
-      leagueDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 3, "win");
-      leagueDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 0, "loss");
+      updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 3, "win");
+      updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 0, "loss");
     } else {
-      leagueDto.updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 1, "draw");
-      leagueDto.updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 1, "draw");
+      updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 1, "draw");
+      updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 1, "draw");
     }
   }
 };
@@ -158,13 +111,13 @@ const calculateLeagueStatisticsPerTeam = (matches: IMatchCreate[]): ITeamsStatis
     const { _id: localTeamId, name: localTeamName, initials: localTeamInitials, image: localTeamImage } = match.localTeam;
     const { _id: visitorTeamId, name: visitorTeamName, initials: visitorTeamInitials, image: visitorTeamImage } = match.visitorTeam;
 
-    teams[localTeamId] = teams[localTeamId] || leagueDto.initializeTeam(localTeamId, localTeamName, localTeamInitials, localTeamImage as string);
-    teams[visitorTeamId] = teams[visitorTeamId] || leagueDto.initializeTeam(visitorTeamId, visitorTeamName, visitorTeamInitials, visitorTeamImage as string);
+    teams[localTeamId] = teams[localTeamId] || initializeTeam(localTeamId, localTeamName, localTeamInitials, localTeamImage as string);
+    teams[visitorTeamId] = teams[visitorTeamId] || initializeTeam(visitorTeamId, visitorTeamName, visitorTeamInitials, visitorTeamImage as string);
 
     const localTeam = teams[localTeamId];
     const visitorTeam = teams[visitorTeamId];
 
-    leagueDto.updateTeamsStatisticsPerMatch(match, localTeam, visitorTeam);
+    updateTeamsStatisticsPerMatch(match, localTeam, visitorTeam);
   }
 
   const teamStatistics = Object.values(teams);
@@ -178,7 +131,6 @@ const calculateLeagueStatisticsPerTeam = (matches: IMatchCreate[]): ITeamsStatis
   return teamStatistics;
 };
 
->>>>>>> parent of 0e05b6f (f)
 const generateMatchesPerLeague = (checkedTeams: ITeam[], startDate: Date): IMatchCreate[] => {
   const matchesInLeague: IMatchCreate[] = [];
 
@@ -255,21 +207,12 @@ const generateMatch = (teams: ITeam[], home: number, away: number, startDate: Da
 
 export const leagueDto = {
   showDataLeague,
-<<<<<<< HEAD
-  checkParsedStartDateForCreateLeague,
-  checkAreTeamsCorrectToCreateLeague,
-  checkAreTeamsNumberCorrectPerCreateLeagueAndShuffleIteamArray,
-=======
-  validateAndParsedStartDateForCreateLeague,
   convertDateStringToDate,
-  checkAreTeamsCorrectToCreateLeague,
-  checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray,
   initializeTeam,
   updateTeamStatistics,
   updateTeamsStatisticsPerMatch,
   calculateLeagueStatisticsPerTeam,
   generateRandomGoalForIdplayers,
->>>>>>> parent of 0e05b6f (f)
   generateMatch,
   generateMatchesPerRound,
   generateMatchesPerLap,
