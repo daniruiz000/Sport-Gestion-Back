@@ -1,5 +1,5 @@
 import { IMatchCreate } from "../entities/match-entity";
-import { ITeamsStatistics } from "../entities/team-entity";
+import { ITeamsStatistics } from "../entities/teamStatics-entity";
 
 const initializeTeamStatic = (teamId: string, teamName: string, teamInitials: string, teamImage: string): ITeamsStatistics => ({
   id: teamId,
@@ -82,7 +82,7 @@ const calculateTeamsStatisticsLeague = (matches: IMatchCreate[]): ITeamsStatisti
     teamStatisticsDto.updateTeamsStatisticsPerMatch(match, localTeam, visitorTeam);
   }
 
-  const teamStatisticsLeague = sortTeamStatisticsByPointsAndAddPosition(teamStatics);
+  const teamStatisticsLeague = teamStatisticsDto.sortTeamStatisticsByPointsAndAddPosition(teamStatics);
 
   return teamStatisticsLeague;
 };

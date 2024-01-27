@@ -1,7 +1,8 @@
-import { userList } from "../../../data";
 import { ROL, IUserCreate } from "../../entities/user-entity";
+
 import { teamOdm } from "../../odm/team.odm";
 import { userOdm } from "../../odm/user.odm";
+import { createRandomUserArray } from "./generateRandomData";
 
 export const resetUsers = async (): Promise<void> => {
   try {
@@ -9,9 +10,9 @@ export const resetUsers = async (): Promise<void> => {
     await userOdm.deleteAllUsers();
     console.log("Usuarios borrados");
 
-    const admins = userList.filter((user) => user.rol === ROL.ADMIN);
-    const managers = userList.filter((user) => user.rol === ROL.MANAGER);
-    const players = userList.filter((user) => user.rol === ROL.PLAYER);
+    const admins = createRandomUserArray(ROL.ADMIN, 5);
+    const managers = createRandomUserArray(ROL.MANAGER, 10);
+    const players = createRandomUserArray(ROL.PLAYER, 60);
 
     const teams = await teamOdm.getAllTeams();
 
@@ -45,7 +46,7 @@ export const resetUsers = async (): Promise<void> => {
 
     console.log("Usuarios y relaciones con equipos creados correctamente");
     console.log({
-      users: userList.length,
+      users: players.length + managers.length + admins.length,
       players: players.length,
       playersWithTeam,
       playersNoTeam,

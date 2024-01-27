@@ -1,6 +1,5 @@
 import { ModifyResult } from "mongodb";
 import { User, IUser, IUserCreate, ROL } from "../entities/user-entity";
-
 import { CustomError } from "../../server/checkError.middleware";
 
 const getAllUsersPaginated = async (page: number, limit: number): Promise<IUser[]> => {

@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
-import { CustomError } from "../server/checkError.middleware";
 import dotenv from "dotenv";
+
+import { CustomError } from "../server/checkError.middleware";
 
 dotenv.config();
 

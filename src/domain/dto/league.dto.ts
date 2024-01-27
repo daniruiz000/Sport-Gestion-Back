@@ -1,48 +1,27 @@
-import { CustomError } from "../../server/checkError.middleware";
-
 import { IMatchCreate } from "../entities/match-entity";
-import { ITeam, ITeamsStatistics } from "../entities/team-entity";
-import { teamStatisticsDto } from "./teamStatics.dto";
 
-import { convertDateStringToDate } from "../../utils/convertDateStringToDate";
+import { ITeam } from "../entities/team-entity";
+import { ITeamsStatistics } from "../entities/teamStatics-entity";
 
-const checkAreTeamsCorrectToCreateLeague = (teams: ITeam[]): void => {
-  if (!teams || teams.length === 0) {
-    throw new CustomError("No hay equipos en la BBDD.", 400);
+import { IUser } from "../entities/user-entity";
+
+const generateRandomGoalForIdplayers = (players: IUser[], minId: number, maxId: number): IUser[] => {
+  const goalIds: IUser[] = [];
+  const numGoals = Math.floor(Math.random() * 4);
+
+  for (let i = 0; i < numGoals; i++) {
+    const playerId = Math.floor(Math.random() * (maxId - minId + 1)) + minId;
+    goalIds.push(players[playerId].id);
   }
 
-  if (teams.length % 2 !== 0) {
-    throw new CustomError("La cantidad de equipos debe ser par para aplicar el algoritmo de doble vuelta.", 400);
-  }
+  return goalIds;
 };
 
-const validateAndParsedStartDateForCreateLeague = (startDateString: string): Date => {
-  const actualDate: Date = new Date();
+const convertDateStringToDate = (dateString: string): Date => {
+  const [day, month, year] = dateString.split("/").map(Number);
+  const fullYear = year < 100 ? year + 2000 : year;
 
-  if (!startDateString) {
-    throw new CustomError("Tiene que introducir una fecha de inicio con formato:'21/5/4' para realizar esta operación", 404);
-  }
-
-  const startDate = convertDateStringToDate(startDateString);
-
-  if (actualDate > startDate) {
-    throw new CustomError("La fecha tiene que ser posterior a la actual", 404);
-  }
-
-  return startDate;
-};
-
-const checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray = (teamList: ITeam[]): ITeam[] => {
-  const newTeamList = [...teamList];
-
-  checkAreTeamsCorrectToCreateLeague(newTeamList);
-
-  for (let i = newTeamList.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newTeamList[i], newTeamList[j]] = [newTeamList[j], newTeamList[i]];
-  }
-
-  return newTeamList;
+  return new Date(fullYear, month - 1, day);
 };
 
 const showDataLeague = (matches: IMatchCreate[], numCheckedTeams: number, numRounds: number): void => {
@@ -72,20 +51,73 @@ const showDataLeague = (matches: IMatchCreate[], numCheckedTeams: number, numRou
   `);
 };
 
-const calculateTeamsStatisticsLeague = (matches: IMatchCreate[]): ITeamsStatistics[] => {
+const initializeTeam = (teamId: string, teamName: string, teamInitials: string, teamImage: string): ITeamsStatistics => ({
+  id: teamId,
+  name: teamName,
+  initials: teamInitials,
+  image: teamImage,
+  matchesPlayed: 0,
+  matchesWon: 0,
+  matchesLost: 0,
+  matchesDrawn: 0,
+  points: 0,
+  goalsFor: 0,
+  goalsAgainst: 0,
+  position: 0,
+});
+
+const updateTeamsStatisticsPerMatch = (match: IMatchCreate, localTeamStatics: ITeamsStatistics, visitorTeamStatics: ITeamsStatistics): void => {
+  if (match.played && match.goalsLocal && match.goalsVisitor) {
+    const localGoals = match.goalsLocal.length || 0;
+    const visitorGoals = match.goalsVisitor.length || 0;
+
+    if (localGoals > visitorGoals) {
+      updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 3, "win");
+      updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 0, "loss");
+    } else if (localGoals < visitorGoals) {
+      updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 3, "win");
+      updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 0, "loss");
+    } else {
+      updateTeamStatistics(localTeamStatics, localGoals, visitorGoals, 1, "draw");
+      updateTeamStatistics(visitorTeamStatics, visitorGoals, localGoals, 1, "draw");
+    }
+  }
+};
+
+const updateTeamStatistics = (teamStatics: ITeamsStatistics, goalsFor: number, goalsAgainst: number, points: number, matchResult: string): void => {
+  teamStatics.goalsFor += goalsFor;
+  teamStatics.goalsAgainst += goalsAgainst;
+  teamStatics.matchesPlayed++;
+
+  switch (matchResult) {
+    case "win":
+      teamStatics.points += points;
+      teamStatics.matchesWon++;
+      break;
+    case "loss":
+      teamStatics.matchesLost++;
+      break;
+    case "draw":
+      teamStatics.points++;
+      teamStatics.matchesDrawn++;
+      break;
+  }
+};
+
+const calculateLeagueStatisticsPerTeam = (matches: IMatchCreate[]): ITeamsStatistics[] => {
   const teams: Record<string, ITeamsStatistics> = {};
 
   for (const match of matches) {
     const { _id: localTeamId, name: localTeamName, initials: localTeamInitials, image: localTeamImage } = match.localTeam;
     const { _id: visitorTeamId, name: visitorTeamName, initials: visitorTeamInitials, image: visitorTeamImage } = match.visitorTeam;
 
-    teams[localTeamId] = teams[localTeamId] || teamStatisticsDto.initializeTeamStatic(localTeamId, localTeamName, localTeamInitials, localTeamImage as string);
-    teams[visitorTeamId] = teams[visitorTeamId] || teamStatisticsDto.initializeTeamStatic(visitorTeamId, visitorTeamName, visitorTeamInitials, visitorTeamImage as string);
+    teams[localTeamId] = teams[localTeamId] || initializeTeam(localTeamId, localTeamName, localTeamInitials, localTeamImage as string);
+    teams[visitorTeamId] = teams[visitorTeamId] || initializeTeam(visitorTeamId, visitorTeamName, visitorTeamInitials, visitorTeamImage as string);
 
     const localTeam = teams[localTeamId];
     const visitorTeam = teams[visitorTeamId];
 
-    teamStatisticsDto.updateTeamsStatisticsPerMatch(match, localTeam, visitorTeam);
+    updateTeamsStatisticsPerMatch(match, localTeam, visitorTeam);
   }
 
   const teamStatistics = Object.values(teams);
@@ -175,10 +207,12 @@ const generateMatch = (teams: ITeam[], home: number, away: number, startDate: Da
 
 export const leagueDto = {
   showDataLeague,
-  validateAndParsedStartDateForCreateLeague,
-  checkAreTeamsCorrectToCreateLeague,
-  checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray,
-  calculateTeamsStatisticsLeague,
+  convertDateStringToDate,
+  initializeTeam,
+  updateTeamStatistics,
+  updateTeamsStatisticsPerMatch,
+  calculateLeagueStatisticsPerTeam,
+  generateRandomGoalForIdplayers,
   generateMatch,
   generateMatchesPerRound,
   generateMatchesPerLap,

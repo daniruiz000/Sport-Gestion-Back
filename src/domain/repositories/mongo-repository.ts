@@ -1,5 +1,3 @@
-// Cargamos variables de entorno
-// Importamos librerías
 import mongoose, { Mongoose, connect } from "mongoose";
 import dotenv from "dotenv";
 
@@ -8,7 +6,6 @@ dotenv.config();
 const DB_CONNECTION: string | undefined = process.env.DB_URL;
 const DB_NAME: string | undefined = process.env.DB_NAME;
 
-// Configuración de la conexión a Mongo
 const config = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
