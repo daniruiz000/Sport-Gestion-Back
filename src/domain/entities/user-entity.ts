@@ -40,7 +40,7 @@ export interface IUserCreate {
   lastName: string;
   email: string;
   password: string;
-  rol: ROL;
+  rol?: ROL;
   team?: string;
   image?: string;
 }
