@@ -9,7 +9,6 @@ import { authDto } from "../dto/auth.dto";
 export const getTeamsPaginated = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // ADMIN
-
     const page = req.query.page ? parseInt(req.query.page as string) : 1;
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
     const userAuthInfo = req.user as UserAuthInfo;
@@ -44,12 +43,11 @@ export const getTeamsPaginated = async (req: Request, res: Response, next: NextF
 
 export const getTeamById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    //  ADMIN
-
+    // ADMIN / / MANAGER A SU EQUIPO
     const teamId = req.params.id;
     const userAuthInfo = req.user as UserAuthInfo;
 
-    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
+    await authDto.iAmManagerAndItsMyTeamOrAdmin(userAuthInfo, teamId);
 
     const team = await teamOdm.getTeamById(teamId);
 
@@ -62,7 +60,6 @@ export const getTeamById = async (req: Request, res: Response, next: NextFunctio
 export const getTeamByName = async (req: any, res: Response, next: NextFunction): Promise<void> => {
   try {
     // ADMIN
-
     const name = req.params.name;
     const userAuthInfo = req.user as UserAuthInfo;
 
@@ -79,7 +76,6 @@ export const getTeamByName = async (req: any, res: Response, next: NextFunction)
 export const createTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // ADMIN
-
     const userAuthInfo = req.user as UserAuthInfo;
 
     authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
@@ -95,7 +91,6 @@ export const createTeam = async (req: Request, res: Response, next: NextFunction
 export const deleteTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     // ADMIN
-
     const id = req.params.id;
 
     const userAuthInfo = req.user as UserAuthInfo;
@@ -112,15 +107,14 @@ export const deleteTeam = async (req: Request, res: Response, next: NextFunction
 
 export const updateTeam = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    // ADMIN
-
-    const id = req.params.id;
+    // ADMIN / / MANAGER A SU EQUIPO
+    const teamIdToUpdate = req.params.id;
 
     const userAuthInfo = req.user as UserAuthInfo;
 
-    authDto.isUserRolAuthToAction(userAuthInfo, [ROL.ADMIN]);
+    await authDto.iAmManagerAndItsMyTeamOrAdmin(userAuthInfo, teamIdToUpdate);
 
-    const teamToUpdate = await teamOdm.getTeamById(id);
+    const teamToUpdate = await teamOdm.getTeamById(teamIdToUpdate);
 
     Object.assign(teamToUpdate, req.body);
 
