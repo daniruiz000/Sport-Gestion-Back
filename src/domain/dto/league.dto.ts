@@ -1,3 +1,4 @@
+import { CustomError } from "../../server/checkError.middleware";
 import { IMatchCreate } from "../entities/match-entity";
 
 import { ITeam } from "../entities/team-entity";
@@ -22,6 +23,45 @@ const convertDateStringToDate = (dateString: string): Date => {
   const fullYear = year < 100 ? year + 2000 : year;
 
   return new Date(fullYear, month - 1, day);
+};
+
+const validateAndParsedStartDateForCreateLeague = (startDateString: string): Date => {
+  const actualDate: Date = new Date();
+
+  if (!startDateString) {
+    throw new CustomError("Tiene que introducir una fecha de inicio con formato:'21/5/4' para realizar esta operación", 404);
+  }
+
+  const startDate = leagueDto.convertDateStringToDate(startDateString);
+
+  if (actualDate > startDate) {
+    throw new CustomError("La fecha tiene que ser posterior a la actual", 404);
+  }
+
+  return startDate;
+};
+
+const checkAreTeamsCorrectToCreateLeague = (teams: ITeam[]): void => {
+  if (!teams || teams.length === 0) {
+    throw new CustomError("No hay equipos en la BBDD.", 400);
+  }
+
+  if (teams.length % 2 !== 0) {
+    throw new CustomError("La cantidad de equipos debe ser par para aplicar el algoritmo de doble vuelta.", 400);
+  }
+};
+
+const checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray = (teamList: ITeam[]): ITeam[] => {
+  const newTeamList = [...teamList];
+
+  checkAreTeamsCorrectToCreateLeague(newTeamList);
+
+  for (let i = newTeamList.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newTeamList[i], newTeamList[j]] = [newTeamList[j], newTeamList[i]];
+  }
+
+  return newTeamList;
 };
 
 const showDataLeague = (matches: IMatchCreate[], numCheckedTeams: number, numRounds: number): void => {
@@ -208,6 +248,8 @@ const generateMatch = (teams: ITeam[], home: number, away: number, startDate: Da
 export const leagueDto = {
   showDataLeague,
   convertDateStringToDate,
+  checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray,
+  validateAndParsedStartDateForCreateLeague,
   initializeTeam,
   updateTeamStatistics,
   updateTeamsStatisticsPerMatch,

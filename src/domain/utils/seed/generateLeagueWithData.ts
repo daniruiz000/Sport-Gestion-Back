@@ -12,7 +12,7 @@ export const generateLeagueWithData = async (startDate: Date): Promise<IMatchCre
   const matchesInLeague: IMatchCreate[] = [];
 
   const teamsInDataBase = await teamOdm.getAllTeams();
-  const checkedTeams = leagueDto.checkAreTeamsNumberCorrectPerCreateLeagueAndShuffleIteamArray(teamsInDataBase);
+  const checkedTeams = leagueDto.checkTeamsNumberIsCorrectPerCreateLeagueAndShuffleIteamArray(teamsInDataBase);
 
   const numTeams = checkedTeams.length;
   const numRounds = (numTeams - 1) * 2;
