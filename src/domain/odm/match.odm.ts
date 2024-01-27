@@ -1,6 +1,6 @@
-import { CustomError } from "../../server/checkError.middleware";
-import { Match, IMatch, IMatchCreate } from "../entities/match-entity";
 import { ModifyResult } from "mongoose";
+import { Match, IMatch, IMatchCreate } from "../entities/match-entity";
+import { CustomError } from "../../server/checkError.middleware";
 
 const getAllMatches = async (): Promise<IMatch[]> => {
   const allMatches = await Match.find().populate(["localTeam", "visitorTeam"]);

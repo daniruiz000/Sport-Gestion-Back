@@ -1,8 +1,9 @@
 import express from "express";
 
 import { decodedUserToken } from "../server/decodedUserToken.middleware";
-import { teamService } from "../domain/services/team.service";
 import { checkPaginatedParams } from "../server/checkPaginatedParams.middleware";
+
+import { teamService } from "../domain/services/team.service";
 
 export const teamRouter = express.Router();
 

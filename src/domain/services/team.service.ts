@@ -1,8 +1,10 @@
 import { Request, Response, NextFunction } from "express";
+
+import { ROL, UserAuthInfo } from "../entities/user-entity";
+
 import { teamOdm } from "../odm/team.odm";
 import { userOdm } from "../odm/user.odm";
 import { authDto } from "../dto/auth.dto";
-import { UserAuthInfo, ROL } from "../entities/user-entity";
 
 export const getTeamsPaginated = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
