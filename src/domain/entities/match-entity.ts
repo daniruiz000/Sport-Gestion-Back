@@ -65,7 +65,7 @@ const matchSchema = new Schema<IMatch>(
       min: [1, "Minimo primera jornada"],
     },
 
-    referee: { type: Schema.Types.ObjectId, ref: User, required: true },
+    referee: { type: Schema.Types.ObjectId, ref: User },
   },
   { timestamps: true }
 );
