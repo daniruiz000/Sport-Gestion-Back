@@ -17,7 +17,7 @@ export interface IMatchCreate {
   goalsVisitor?: IUser[];
   played: boolean;
   round: number;
-  referee: IUser;
+  referee?: IUser;
 }
 
 export interface IMatch extends IMatchCreate, Document {}

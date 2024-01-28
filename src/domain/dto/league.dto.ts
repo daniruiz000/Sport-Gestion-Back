@@ -3,8 +3,6 @@ import { convertDateStringToDate } from "../../utils/convertDateStringToDate";
 import { IMatchCreate } from "../entities/match-entity";
 
 import { ITeam } from "../entities/team-entity";
-import { IUser } from "../entities/user-entity";
-import { userOdm } from "../odm/user.odm";
 
 const checkAndParsedStartDateForCreateLeague = (startDateString: string): Date => {
   const actualDate: Date = new Date();
@@ -49,7 +47,7 @@ const showDataLeague = (matches: IMatchCreate[], numCheckedTeams: number, numRou
   for (const match of matches) {
     const formattedDate = match.date.toLocaleDateString();
     const status = match.played ? "Jugado" : "Pendiente";
-    console.log(`Jornada ${match.round} Partido: ${match.localTeam.name} | ${match.goalsLocal?.length ? match.goalsLocal?.length : 0} - ${match.goalsVisitor?.length ? match.goalsVisitor?.length : 0} | ${match.visitorTeam.name} Fecha ${formattedDate} - ${status} - Arbitro: ${match.referee.firstName} ${match.referee.lastName}`);
+    console.log(`Jornada ${match.round} Partido: ${match.localTeam.name} | ${match.goalsLocal?.length ? match.goalsLocal?.length : 0} - ${match.goalsVisitor?.length ? match.goalsVisitor?.length : 0} | ${match.visitorTeam.name} Fecha ${formattedDate} - ${status} - Arbitro: ${match?.referee?.firstName as string} ${match?.referee?.lastName as string}`);
   }
 
   console.log(`
@@ -96,10 +94,8 @@ const generateMatchesPerLap = async (checkedTeams: ITeam[], startDate: Date, rev
   const numTotalRoundsInLeague = (numCheckedTeams - 1) * 2;
   const numerRoundsPerLap = numTotalRoundsInLeague / 2;
 
-  const refereeList = await userOdm.getAllReferees();
-
   for (let round = 1; round <= numerRoundsPerLap; round++) {
-    const roundMatchesPerRound = await leagueDto.generateMatchesPerRound(checkedTeams, refereeList, startDate, round, reverse);
+    const roundMatchesPerRound = await leagueDto.generateMatchesPerRound(checkedTeams, startDate, round, reverse);
 
     for (const match of roundMatchesPerRound) {
       matchesInLap.push(match);
@@ -109,7 +105,7 @@ const generateMatchesPerLap = async (checkedTeams: ITeam[], startDate: Date, rev
   return matchesInLap;
 };
 
-const generateMatchesPerRound = async (checkedTeams: ITeam[], refereeList: IUser[], startDate: Date, round: number, reverse: boolean): Promise<IMatchCreate[]> => {
+const generateMatchesPerRound = async (checkedTeams: ITeam[], startDate: Date, round: number, reverse: boolean): Promise<IMatchCreate[]> => {
   const matchesPerRound = [];
 
   const numCheckedTeams = checkedTeams.length;
@@ -121,18 +117,16 @@ const generateMatchesPerRound = async (checkedTeams: ITeam[], refereeList: IUser
     const home = reverse ? (numCheckedTeams - 1 - i + round) % numCheckedTeams : (i + round) % numCheckedTeams;
     const away = reverse ? (i + round) % numCheckedTeams : (numCheckedTeams - 1 - i + round) % numCheckedTeams;
 
-    const referee = refereeList[i];
-
     const actualRound = reverse ? round + numerRoundsPerLap : round;
 
-    const matchLeague = leagueDto.generateMatch(checkedTeams, home, away, startDate, actualRound, referee);
+    const matchLeague = leagueDto.generateMatch(checkedTeams, home, away, startDate, actualRound);
     matchesPerRound.push(matchLeague);
   }
 
   return matchesPerRound;
 };
 
-const generateMatch = (teams: ITeam[], home: number, away: number, startDate: Date, actualRound: number, referee: IUser): IMatchCreate => {
+const generateMatch = (teams: ITeam[], home: number, away: number, startDate: Date, actualRound: number): IMatchCreate => {
   const localTeam = teams[home];
   const visitorTeam = teams[away];
 
@@ -146,7 +140,6 @@ const generateMatch = (teams: ITeam[], home: number, away: number, startDate: Da
     visitorTeam,
     played,
     round: actualRound,
-    referee,
   };
 
   return match;
