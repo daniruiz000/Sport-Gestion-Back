@@ -47,7 +47,12 @@ const showDataLeague = (matches: IMatchCreate[], numCheckedTeams: number, numRou
   for (const match of matches) {
     const formattedDate = match.date.toLocaleDateString();
     const status = match.played ? "Jugado" : "Pendiente";
-    console.log(`Jornada ${match.round} Partido: ${match.localTeam.name} | ${match.goalsLocal?.length ? match.goalsLocal?.length : 0} - ${match.goalsVisitor?.length ? match.goalsVisitor?.length : 0} | ${match.visitorTeam.name} Fecha ${formattedDate} - ${status} - Arbitro: ${match?.referee?.firstName as string} ${match?.referee?.lastName as string}`);
+    console.log(`
+    Jornada ${match.round}  
+    Partido: ${match.localTeam.name} | ${match.goalsLocal?.length ? match.goalsLocal?.length : 0} - ${match.goalsVisitor?.length ? match.goalsVisitor?.length : 0} | ${match.visitorTeam.name}
+    Fecha ${formattedDate} - ${status}
+    Arbitro: ${match?.referee ? match?.referee?.firstName + " " + match?.referee?.lastName : "sin arbitro"}
+    `);
   }
 
   console.log(`
