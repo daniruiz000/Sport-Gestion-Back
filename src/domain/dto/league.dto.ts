@@ -71,7 +71,6 @@ const showDataLeague = (matches: IMatchCreate[], numCheckedTeams: number, numRou
   Liga generada correctamente
 
   ------------------------------
-  
   `);
 };
 
